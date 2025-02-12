@@ -3,6 +3,7 @@ package com.mega_city_cabs.mega_city_cabs.DTO;
 import com.mega_city_cabs.mega_city_cabs.Entity.administrator;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Component
 public class vehicleDTO {
@@ -15,14 +16,14 @@ public class vehicleDTO {
 
     private String vehicleModel;
 
-    private LocalDate registeredDate;
+    private LocalDateTime registeredDate;
 
     private administrator Admin;
 
     public vehicleDTO() {
     }
 
-    public vehicleDTO(String vehicleId, String vehicleNumber, String vehicleType, String vehicleModel, LocalDate registeredDate, administrator admin) {
+    public vehicleDTO(String vehicleId, String vehicleNumber, String vehicleType, String vehicleModel, LocalDateTime registeredDate, administrator admin) {
         this.vehicleId = vehicleId;
         this.vehicleNumber = vehicleNumber;
         this.vehicleType = vehicleType;
@@ -63,11 +64,11 @@ public class vehicleDTO {
         this.vehicleModel = vehicleModel;
     }
 
-    public LocalDate getRegisteredDate() {
+    public LocalDateTime getRegisteredDate() {
         return registeredDate;
     }
 
-    public void setRegisteredDate(LocalDate registeredDate) {
+    public void setRegisteredDate(LocalDateTime registeredDate) {
         this.registeredDate = registeredDate;
     }
 

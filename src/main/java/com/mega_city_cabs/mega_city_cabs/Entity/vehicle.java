@@ -3,6 +3,7 @@ package com.mega_city_cabs.mega_city_cabs.Entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "vehicle")
@@ -21,7 +22,7 @@ public class vehicle {
     private String vehicleModel;
 
     @Column(name = "registered_date", nullable = false)
-    private LocalDate registeredDate;
+    private LocalDateTime registeredDate;
 
     @ManyToOne
     @JoinColumn(name = "admin_id", nullable = false)
@@ -30,7 +31,7 @@ public class vehicle {
     public vehicle() {
     }
 
-    public vehicle(String vehicleId, String vehicleNumber, String vehicleType, String vehicleModel, LocalDate registeredDate, administrator admin) {
+    public vehicle(String vehicleId, String vehicleNumber, String vehicleType, String vehicleModel, LocalDateTime registeredDate, administrator admin) {
         this.vehicleId = vehicleId;
         this.vehicleNumber = vehicleNumber;
         this.vehicleType = vehicleType;
@@ -71,11 +72,11 @@ public class vehicle {
         this.vehicleModel = vehicleModel;
     }
 
-    public LocalDate getRegisteredDate() {
+    public LocalDateTime getRegisteredDate() {
         return registeredDate;
     }
 
-    public void setRegisteredDate(LocalDate registeredDate) {
+    public void setRegisteredDate(LocalDateTime registeredDate) {
         this.registeredDate = registeredDate;
     }
 

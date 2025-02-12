@@ -1,17 +1,21 @@
 package com.mega_city_cabs.mega_city_cabs.Controller;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.mega_city_cabs.mega_city_cabs.DTO.registerVehicleDTO;
+import com.mega_city_cabs.mega_city_cabs.Service.vehicleServiceIMPL;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin
 @RequestMapping("api/v1/vehicle")
 public class vehicle {
-    @PostMapping("/vehicle-register")
-    private String registerVehicle(){
 
-        return "";
+    @Autowired
+    vehicleServiceIMPL register;
+
+    @PostMapping("/vehicle-register")
+    private String registerVehicle(@RequestBody registerVehicleDTO registerVehicleDTO){
+
+        return register.registerVehicle(registerVehicleDTO);
     }
 }
