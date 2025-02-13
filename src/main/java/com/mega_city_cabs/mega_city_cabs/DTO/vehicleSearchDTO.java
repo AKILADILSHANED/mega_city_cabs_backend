@@ -1,55 +1,34 @@
-package com.mega_city_cabs.mega_city_cabs.Entity;
+package com.mega_city_cabs.mega_city_cabs.DTO;
 
-import jakarta.persistence.*;
+import com.mega_city_cabs.mega_city_cabs.Entity.administrator;
+import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "vehicle")
-public class vehicle {
-    @Id
-    @Column(name = "vehicle_id", length = 5, nullable = false)
+public class vehicleSearchDTO {
+
     private String vehicleId;
 
-    @Column(name = "vehicle_number", length = 8, nullable = false)
     private String vehicleNumber;
 
-    @Column(name = "vehicle_type", length = 10, nullable = false)
     private String vehicleType;
 
-    @Column(name = "vehicle_model", length = 15, nullable = false)
     private String vehicleModel;
 
-    @Column(name = "registered_date", nullable = false)
     private LocalDateTime registeredDate;
 
-    @Column(name = "is_deleted", length = 1, nullable = false)
-    private int deleteStatus;
-
-    @ManyToOne
-    @JoinColumn(name = "admin_id", nullable = false)
     private administrator Admin;
 
-    public vehicle() {
+    public vehicleSearchDTO() {
     }
 
-    public vehicle(String vehicleId, String vehicleNumber, String vehicleType, String vehicleModel, LocalDateTime registeredDate, int deleteStatus, administrator admin) {
+    public vehicleSearchDTO(String vehicleId, String vehicleNumber, String vehicleType, String vehicleModel, LocalDateTime registeredDate, administrator admin) {
         this.vehicleId = vehicleId;
         this.vehicleNumber = vehicleNumber;
         this.vehicleType = vehicleType;
         this.vehicleModel = vehicleModel;
         this.registeredDate = registeredDate;
-        this.deleteStatus = deleteStatus;
         Admin = admin;
-    }
-
-    public int getDeleteStatus() {
-        return deleteStatus;
-    }
-
-    public void setDeleteStatus(int deleteStatus) {
-        this.deleteStatus = deleteStatus;
     }
 
     public String getVehicleId() {
