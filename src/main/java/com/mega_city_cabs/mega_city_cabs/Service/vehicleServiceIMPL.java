@@ -2,6 +2,7 @@ package com.mega_city_cabs.mega_city_cabs.Service;
 
 import com.mega_city_cabs.mega_city_cabs.DTO.registerVehicleDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.vehicleSearchDTO;
+import com.mega_city_cabs.mega_city_cabs.DTO.vehicleUpdateDTO;
 import com.mega_city_cabs.mega_city_cabs.Entity.administrator;
 import com.mega_city_cabs.mega_city_cabs.Entity.vehicle;
 import com.mega_city_cabs.mega_city_cabs.Repository.adminRepo;
@@ -65,33 +66,60 @@ public class vehicleServiceIMPL implements vehicleService{
         }
     }
 
-
-
-
-    Optional<vehicle> vehicle;
-
     @Override
     public vehicleSearchDTO vehicleSearch(String vehicleId) {
         try{
-            vehicle = vehiclerepository.findById(vehicleId);
-            vehicle vehicleEntity = vehicle.get();
+            Optional<vehicle> vehicleSearch = vehiclerepository.findById(vehicleId);
 
-            if(vehicleEntity == null){
+            if(vehicleSearch.get().getDeleteStatus() == 1){
                 return null;
             }else{
-                vehicleSearchDTO vehicleSearch = new vehicleSearchDTO(
-                        vehicleEntity.getVehicleId(),
-                        vehicleEntity.getVehicleNumber(),
-                        vehicleEntity.getVehicleType(),
-                        vehicleEntity.getVehicleModel(),
-                        vehicleEntity.getRegisteredDate(),
-                        vehicleEntity.getAdmin()
+                vehicleSearchDTO vehicleSearchObject = new vehicleSearchDTO(
+                        vehicleSearch.get().getVehicleId(),
+                        vehicleSearch.get().getVehicleNumber(),
+                        vehicleSearch.get().getVehicleType(),
+                        vehicleSearch.get().getVehicleModel(),
+                        vehicleSearch.get().getRegisteredDate(),
+                        vehicleSearch.get().getAdmin()
                 );
-                return vehicleSearch;
+                return vehicleSearchObject;
             }
 
         }catch (Exception e){
             return null;
+        }
+    }
+
+    @Override
+    public String updateVehicle(vehicleUpdateDTO vehicleUpdate) {
+        try{
+            int affectedRows = vehiclerepository.updateVehicleDetails(
+                    vehicleUpdate.getVehicleNumber(),
+                    vehicleUpdate.getVehicleType(),
+                    vehicleUpdate.getVehicleModel(),
+                    vehicleUpdate.getVehicleId()
+            );
+            if(affectedRows > 0){
+                return "Vehicle details successfully updated for Vehicle ID: " + vehicleUpdate.getVehicleId() + "!";
+            }else{
+                return "No vehicle details found for Vehicle ID: " + vehicleUpdate.getVehicleId() + "!";
+            }
+        }catch (Exception e){
+            return "Error in updating vehicle details. Please contact administrator!";
+        }
+    }
+
+    @Override
+    public String deleteVehicle(String vehicleId) {
+        try{
+            int affectedRow = vehiclerepository.deleteVehicle(vehicleId);
+            if(affectedRow > 0){
+                return "Vehicle ID: " + vehicleId + " deleted successfully!";
+            }else{
+                return "No record found for Vehicle ID: " + vehicleId;
+            }
+        }catch (Exception e){
+            return "Error in deleting vehicle details. Please contact administrator!";
         }
     }
 }
