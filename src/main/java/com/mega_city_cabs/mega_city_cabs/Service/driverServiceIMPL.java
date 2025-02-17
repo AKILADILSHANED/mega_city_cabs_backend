@@ -1,12 +1,15 @@
 package com.mega_city_cabs.mega_city_cabs.Service;
 
 import com.mega_city_cabs.mega_city_cabs.DTO.driverRegisterDTO;
+import com.mega_city_cabs.mega_city_cabs.DTO.driverSearchDTO;
 import com.mega_city_cabs.mega_city_cabs.Entity.driver;
 import com.mega_city_cabs.mega_city_cabs.Repository.adminRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.driverRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class driverServiceIMPL implements driverService{
@@ -51,9 +54,49 @@ public class driverServiceIMPL implements driverService{
 
         try{
             driverRepository.save(driverObj);
-            return "Driver registered successfully!";
+            return "Driver registered successfully with Driver ID: " + newLastDriverId + "!";
         }catch (Exception e){
             return e.getMessage();
+        }
+    }
+
+    @Override
+    public driverSearchDTO driverSearch(String driverId) {
+
+        try{
+            //Check any record available for provided driver id.
+            Optional<driver> searchedDriver =  driverRepository.findById(driverId);
+            if(searchedDriver.isEmpty()){
+                return new driverSearchDTO(
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "No driver details found for provided Driver ID!"
+                );
+            }else{
+                return new driverSearchDTO(
+                        searchedDriver.get().getDriverId(),
+                        searchedDriver.get().getFirstName(),
+                        searchedDriver.get().getLastName(),
+                        searchedDriver.get().getContactNumber(),
+                        searchedDriver.get().getNic(),
+                        searchedDriver.get().getRegisteredDate(),
+                        null
+                );
+            }
+        }catch (Exception e){
+            return new driverSearchDTO(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "An Error occurred. Please contact administrator!"
+            );
         }
     }
 }
