@@ -2,13 +2,14 @@ package com.mega_city_cabs.mega_city_cabs.Service;
 
 import com.mega_city_cabs.mega_city_cabs.DTO.driverRegisterDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.driverSearchDTO;
+import com.mega_city_cabs.mega_city_cabs.DTO.driverUpdateDTO;
 import com.mega_city_cabs.mega_city_cabs.Entity.driver;
 import com.mega_city_cabs.mega_city_cabs.Repository.adminRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.driverRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -77,15 +78,28 @@ public class driverServiceIMPL implements driverService{
                         "No driver details found for provided Driver ID!"
                 );
             }else{
-                return new driverSearchDTO(
-                        searchedDriver.get().getDriverId(),
-                        searchedDriver.get().getFirstName(),
-                        searchedDriver.get().getLastName(),
-                        searchedDriver.get().getContactNumber(),
-                        searchedDriver.get().getNic(),
-                        searchedDriver.get().getRegisteredDate(),
-                        null
-                );
+
+                if(searchedDriver.get().getIsDeleted() == 1){
+                    return new driverSearchDTO(
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            "This driver is already removed!"
+                    );
+                }else{
+                    return new driverSearchDTO(
+                            searchedDriver.get().getDriverId(),
+                            searchedDriver.get().getFirstName(),
+                            searchedDriver.get().getLastName(),
+                            searchedDriver.get().getContactNumber(),
+                            searchedDriver.get().getNic(),
+                            searchedDriver.get().getRegisteredDate(),
+                            null
+                    );
+                }
             }
         }catch (Exception e){
             return new driverSearchDTO(
@@ -97,6 +111,43 @@ public class driverServiceIMPL implements driverService{
                     null,
                     "An Error occurred. Please contact administrator!"
             );
+        }
+    }
+
+    @Transactional
+    @Override
+    public String driverUpdate(driverUpdateDTO driverUpdate) {
+        try {
+            int affectedRows = driverRepository.driverUpdate(
+                    driverUpdate.getFirstName(),
+                    driverUpdate.getLastName(),
+                    driverUpdate.getContactNumber(),
+                    driverUpdate.getNic(),
+                    driverUpdate.getDriverId()
+            );
+
+            if (affectedRows > 0) {
+                return "Driver details updated successfully!";
+            } else {
+                return "No record found for provided Driver ID!";
+            }
+        }catch (Exception e){
+            return e.getMessage();
+        }
+    }
+
+    @Transactional
+    @Override
+    public String removeDriver(String driverId) {
+        try{
+            int affectedRows = driverRepository.removeDriver(driverId);
+            if(affectedRows > 0){
+                return "Driver removed successfully!";
+            }else{
+                return "No driver details found for provided Driver ID!";
+            }
+        }catch (Exception e){
+            return e.getMessage();
         }
     }
 }

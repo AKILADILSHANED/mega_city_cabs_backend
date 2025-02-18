@@ -2,12 +2,13 @@ package com.mega_city_cabs.mega_city_cabs.Controller;
 
 import com.mega_city_cabs.mega_city_cabs.DTO.driverRegisterDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.driverSearchDTO;
+import com.mega_city_cabs.mega_city_cabs.DTO.driverUpdateDTO;
 import com.mega_city_cabs.mega_city_cabs.Service.driverServiceIMPL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/v1/driver")
 public class driver {
 
@@ -22,5 +23,15 @@ public class driver {
     @GetMapping("/driver-search")
     private driverSearchDTO driverSearch(@RequestParam String driverId){
         return driverService.driverSearch(driverId);
+    }
+
+    @PostMapping("/driver-update")
+    private String driverUpdate(@RequestBody driverUpdateDTO driverUpdate){
+        return driverService.driverUpdate(driverUpdate);
+    }
+
+    @PostMapping("/driver-remove")
+    private String removeDriver(@RequestParam String driverId){
+        return driverService.removeDriver(driverId);
     }
 }
