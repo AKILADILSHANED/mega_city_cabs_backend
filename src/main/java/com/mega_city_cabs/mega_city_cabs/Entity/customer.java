@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "customer")
 public class customer {
@@ -34,10 +36,13 @@ public class customer {
     @Column(name = "password", length = 15, nullable = false)
     private String password;
 
+    @Column(name = "registered_date", nullable = false)
+    private LocalDateTime registeredDate;
+
     public customer() {
     }
 
-    public customer(String customerId, String firstName, String lastName, String contact, String email, String nic, String address, String password) {
+    public customer(String customerId, String firstName, String lastName, String contact, String email, String nic, String address, String password, LocalDateTime registeredDate) {
         this.customerId = customerId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -46,6 +51,7 @@ public class customer {
         this.nic = nic;
         this.address = address;
         this.password = password;
+        this.registeredDate = registeredDate;
     }
 
     public String getCustomerId() {
@@ -110,5 +116,13 @@ public class customer {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public LocalDateTime getRegisteredDate() {
+        return registeredDate;
+    }
+
+    public void setRegisteredDate(LocalDateTime registeredDate) {
+        this.registeredDate = registeredDate;
     }
 }
