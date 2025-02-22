@@ -1,9 +1,7 @@
 package com.mega_city_cabs.mega_city_cabs.Entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.mega_city_cabs.mega_city_cabs.DTO.pendingCustomerRegistrationsDTO;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
@@ -36,13 +34,11 @@ public class customer {
     @Column(name = "password", length = 15, nullable = false)
     private String password;
 
-    @Column(name = "registered_date", nullable = false)
-    private LocalDateTime registeredDate;
 
     public customer() {
     }
 
-    public customer(String customerId, String firstName, String lastName, String contact, String email, String nic, String address, String password, LocalDateTime registeredDate) {
+    public customer(String customerId, String firstName, String lastName, String contact, String email, String nic, String address, String password) {
         this.customerId = customerId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -51,7 +47,6 @@ public class customer {
         this.nic = nic;
         this.address = address;
         this.password = password;
-        this.registeredDate = registeredDate;
     }
 
     public String getCustomerId() {
@@ -116,13 +111,5 @@ public class customer {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public LocalDateTime getRegisteredDate() {
-        return registeredDate;
-    }
-
-    public void setRegisteredDate(LocalDateTime registeredDate) {
-        this.registeredDate = registeredDate;
     }
 }

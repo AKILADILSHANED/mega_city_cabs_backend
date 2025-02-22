@@ -1,9 +1,12 @@
 package com.mega_city_cabs.mega_city_cabs.Controller;
 
 import com.mega_city_cabs.mega_city_cabs.DTO.customerRegisterDTO;
+import com.mega_city_cabs.mega_city_cabs.DTO.pendingCustomerRegistrationsDTO;
 import com.mega_city_cabs.mega_city_cabs.Service.customerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -21,5 +24,10 @@ public class customer {
     @PostMapping("/customer-register")
     private String customerRegister(@RequestBody customerRegisterDTO registerCustomer){
         return customerServices.customerRegister(registerCustomer);
+    }
+
+    @GetMapping("/pending-registrations")
+    private List<pendingCustomerRegistrationsDTO> pendingRegistrations(){
+        return customerServices.pendingRegistrations();
     }
 }
