@@ -1,12 +1,10 @@
 package com.mega_city_cabs.mega_city_cabs.Repository;
 
-import com.mega_city_cabs.mega_city_cabs.DTO.pendingCustomerRegistrationsDTO;
 import com.mega_city_cabs.mega_city_cabs.Entity.customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 
 @Repository
 public interface customerRepo extends JpaRepository<customer, String> {

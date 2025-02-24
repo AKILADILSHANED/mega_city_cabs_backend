@@ -7,6 +7,7 @@ import com.mega_city_cabs.mega_city_cabs.Entity.customer;
 import com.mega_city_cabs.mega_city_cabs.Repository.customerRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.pendingRegistration;
 import com.mega_city_cabs.mega_city_cabs.Repository.registrationRequestRepo;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,9 @@ public class customerServiceIMPL implements customerService{
     @Autowired
     pendingRegistration registration;
 
+    @Autowired
+    HttpSession session;
+
     @Override
     public String customerLogin(String email, String password) {
         try{
@@ -33,6 +37,7 @@ public class customerServiceIMPL implements customerService{
             if(customerAvailability == null){
                 return "0";
             }else {
+                session.setAttribute("customer_id", customerAvailability);
                 return "1";
             }
         }catch (Exception e){
