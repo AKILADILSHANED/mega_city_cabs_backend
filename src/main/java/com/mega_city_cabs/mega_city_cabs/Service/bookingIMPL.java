@@ -31,7 +31,6 @@ public class bookingIMPL implements customerBooking {
     @Override
     public String newBooking(newBookingDTO newBooking) {
 
-        String lastBookingId;
         String newBookingId;
 
         try{
@@ -47,21 +46,28 @@ public class bookingIMPL implements customerBooking {
             return e.getMessage();
         }
 
-        try{
-            booking bookingObj = new booking(
-                    newBookingId,
-                    newBooking.getPickupLocation(),
-                    newBooking.getDestination(),
-                    LocalDateTime.now(),
-                    "Car",
-                    "Online",
-                    customerRepository.findById(session.getAttribute("customer_id").toString()).get(),
-                    admin.findById("ADMN001").get()
-            );
-            bookingRepository.save(bookingObj);
-            return "Booking request is completed successfully!";
-        }catch (Exception e){
-            return e.getMessage();
+        if(session.getAttribute("customer_id") == null){
+            return "Please log in to the system again!";
+        }else{
+            try{
+                booking bookingObj = new booking(
+                        newBookingId,
+                        newBooking.getPickupLocation(),
+                        newBooking.getDestination(),
+                        LocalDateTime.now(),
+                        newBooking.getVehicleType(),
+                        "Online",
+                        0,
+                        customerRepository.getCustomerObject(session.getAttribute("customer_id").toString()),
+                        null
+                );
+                bookingRepository.save(bookingObj);
+                return "Booking request is completed successfully!";
+            }catch (Exception e){
+                //return "An error occurred while initiating the booking. Please try again later!";
+                return e.getMessage();
+            }
         }
+
     }
 }

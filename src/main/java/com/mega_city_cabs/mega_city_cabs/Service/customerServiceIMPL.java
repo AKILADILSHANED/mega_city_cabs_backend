@@ -38,7 +38,7 @@ public class customerServiceIMPL implements customerService{
                 return "0";
             }else {
                 session.setAttribute("customer_id", customerAvailability);
-                return "1";
+                return "1" ;
             }
         }catch (Exception e){
             return e.getMessage();

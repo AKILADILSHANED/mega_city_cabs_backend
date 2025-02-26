@@ -26,24 +26,28 @@ public class booking {
     @Column(name = "booking_type", length = 30, nullable = false)
     private String bookingType;
 
+    @Column(name = "is_cancelled", length = 1, nullable = false)
+    private int isCancelled;
+
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private customer customerId;
 
     @ManyToOne
-    @JoinColumn(name = "admin_id", nullable = true)
+    @JoinColumn(name = "approved_by", nullable = true)
     private administrator confirmBy;
 
     public booking() {
     }
 
-    public booking(String bookingId, String pickupLocation, String destination, LocalDateTime bookingDate, String vehicleType, String bookingType, customer customerId, administrator confirmBy) {
+    public booking(String bookingId, String pickupLocation, String destination, LocalDateTime bookingDate, String vehicleType, String bookingType, int isCancelled, customer customerId, administrator confirmBy) {
         this.bookingId = bookingId;
         this.pickupLocation = pickupLocation;
         this.destination = destination;
         this.bookingDate = bookingDate;
         this.vehicleType = vehicleType;
         this.bookingType = bookingType;
+        this.isCancelled = isCancelled;
         this.customerId = customerId;
         this.confirmBy = confirmBy;
     }
@@ -94,6 +98,14 @@ public class booking {
 
     public void setBookingType(String bookingType) {
         this.bookingType = bookingType;
+    }
+
+    public int getIsCancelled() {
+        return isCancelled;
+    }
+
+    public void setIsCancelled(int isCancelled) {
+        this.isCancelled = isCancelled;
     }
 
     public customer getCustomerId() {
