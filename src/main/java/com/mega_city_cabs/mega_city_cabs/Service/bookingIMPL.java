@@ -1,5 +1,6 @@
 package com.mega_city_cabs.mega_city_cabs.Service;
 
+import com.mega_city_cabs.mega_city_cabs.DTO.cancelBookingDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.newBookingDTO;
 import com.mega_city_cabs.mega_city_cabs.Entity.booking;
 import com.mega_city_cabs.mega_city_cabs.Repository.adminRepo;
@@ -69,5 +70,43 @@ public class bookingIMPL implements customerBooking {
             }
         }
 
+    }
+
+    @Override
+    public cancelBookingDTO displayBookingForCancel(String bookingId) {
+        booking bookingObj = bookingRepository.findById(bookingId).get();
+        cancelBookingDTO cancelBookingObj = new cancelBookingDTO(
+                bookingObj.getBookingId(),
+                bookingObj.getPickupLocation(),
+                bookingObj.getDestination(),
+                bookingObj.getBookingDate(),
+                bookingObj.getVehicleType(),
+                bookingObj.getBookingType()
+        );
+        return cancelBookingObj;
+    }
+
+    @Transactional
+    @Override
+    public String cancelBooking(String bookingId) {
+        String returnMessage = null;
+        try{
+            booking approval = bookingRepository.checkBookingApproval(bookingId);
+            if(approval.getConfirmBy() == null && approval.getIsCancelled() == 0){
+                try{
+                    int affectedRow = bookingRepository.cancelBooking(bookingId);
+                    returnMessage = "Booking cancelled successfully!";
+                }catch (Exception e){
+                    returnMessage = e.getMessage();
+                }
+            }else if(approval.getConfirmBy() == null && approval.getIsCancelled() == 1){
+                returnMessage = "This booking is already Cancelled!";
+            }else if(approval.getConfirmBy() != null){
+                returnMessage = "This booking is already approved. Please contact us for cancellation!";
+            }
+        }catch (Exception e){
+            returnMessage = e.getMessage();
+        }
+        return returnMessage;
     }
 }
