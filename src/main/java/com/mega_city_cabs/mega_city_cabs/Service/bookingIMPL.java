@@ -74,39 +74,78 @@ public class bookingIMPL implements customerBooking {
 
     @Override
     public cancelBookingDTO displayBookingForCancel(String bookingId) {
-        booking bookingObj = bookingRepository.findById(bookingId).get();
-        cancelBookingDTO cancelBookingObj = new cancelBookingDTO(
-                bookingObj.getBookingId(),
-                bookingObj.getPickupLocation(),
-                bookingObj.getDestination(),
-                bookingObj.getBookingDate(),
-                bookingObj.getVehicleType(),
-                bookingObj.getBookingType()
-        );
-        return cancelBookingObj;
+        try{
+            booking bookingObj = bookingRepository.checkBooking(session.getAttribute("customer_id").toString(),bookingId);
+            if(bookingObj != null){
+                if(bookingObj.getConfirmBy() != null){
+                    return new cancelBookingDTO(
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            "This booking is already approved. Please contact us to cancel booking!"
+                    );
+                }else{
+                    if(bookingObj.getIsCancelled() == 1){
+                        return new cancelBookingDTO(
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "This booking is already canceled!"
+                        );
+                    }else{
+                        return new cancelBookingDTO(
+                                bookingObj.getBookingId(),
+                                bookingObj.getPickupLocation(),
+                                bookingObj.getDestination(),
+                                bookingObj.getBookingDate(),
+                                bookingObj.getVehicleType(),
+                                bookingObj.getBookingType(),
+                                null
+                        );
+                    }
+                }
+            }else{
+                return new cancelBookingDTO(
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "No booking details found for provided Booking ID!"
+                );
+            }
+        }catch (Exception e){
+            return new cancelBookingDTO(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    e.getMessage()
+            );
+        }
     }
 
     @Transactional
     @Override
     public String cancelBooking(String bookingId) {
-        String returnMessage = null;
         try{
-            booking approval = bookingRepository.checkBookingApproval(bookingId);
-            if(approval.getConfirmBy() == null && approval.getIsCancelled() == 0){
-                try{
-                    int affectedRow = bookingRepository.cancelBooking(bookingId);
-                    returnMessage = "Booking cancelled successfully!";
-                }catch (Exception e){
-                    returnMessage = e.getMessage();
-                }
-            }else if(approval.getConfirmBy() == null && approval.getIsCancelled() == 1){
-                returnMessage = "This booking is already Cancelled!";
-            }else if(approval.getConfirmBy() != null){
-                returnMessage = "This booking is already approved. Please contact us for cancellation!";
+            int affected_rows = bookingRepository.cancelBooking(bookingId);
+            if(affected_rows > 0){
+                return "Your booking was canceled successfully!";
+            }else {
+                return "";
             }
         }catch (Exception e){
-            returnMessage = e.getMessage();
+            return e.getMessage();
         }
-        return returnMessage;
     }
 }
