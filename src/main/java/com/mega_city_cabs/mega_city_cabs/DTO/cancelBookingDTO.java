@@ -10,17 +10,19 @@ public class cancelBookingDTO {
     private LocalDateTime bookingDate;
     private String vehicleType;
     private String bookingType;
+    private String message;
 
     public cancelBookingDTO() {
     }
 
-    public cancelBookingDTO(String bookingId, String pickupLocation, String destination, LocalDateTime bookingDate, String vehicleType, String bookingType) {
+    public cancelBookingDTO(String bookingId, String pickupLocation, String destination, LocalDateTime bookingDate, String vehicleType, String bookingType, String message) {
         this.bookingId = bookingId;
         this.pickupLocation = pickupLocation;
         this.destination = destination;
         this.bookingDate = bookingDate;
         this.vehicleType = vehicleType;
         this.bookingType = bookingType;
+        this.message = message;
     }
 
     public String getBookingId() {
@@ -69,5 +71,13 @@ public class cancelBookingDTO {
 
     public void setBookingType(String bookingType) {
         this.bookingType = bookingType;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }
