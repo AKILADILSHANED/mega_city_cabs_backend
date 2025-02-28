@@ -13,4 +13,7 @@ public interface adminRepo extends JpaRepository<administrator, String> {
     @Query("SELECT COUNT(a) > 0 FROM administrator a WHERE a.loginId = :userName AND a.password = :password")
     boolean adminExistance(String userName, String password);
 
+    @Query(value = "SELECT admin_id FROM administrator WHERE login_id = ?1 AND password = ?2", nativeQuery = true)
+    public String getAdminId(String userName, String password);
+
 }
