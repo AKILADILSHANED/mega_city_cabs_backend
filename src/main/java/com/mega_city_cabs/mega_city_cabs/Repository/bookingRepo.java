@@ -12,8 +12,8 @@ public interface bookingRepo extends JpaRepository<booking, String> {
     @Query(value = "SELECT booking_id FROM booking ORDER BY booking_date DESC LIMIT 1", nativeQuery = true)
     public String getLastBookingId();
 
-    @Query(value = "SELECT * from booking WHERE booking_id = ?1", nativeQuery = true)
-    public booking checkBookingApproval(String bookingId);
+    @Query(value = "SELECT * FROM booking WHERE customer_id = ?1 AND booking_id = ?2", nativeQuery = true)
+    public booking checkBooking(String customer_id, String bookingId);
 
     @Modifying
     @Query(value = "UPDATE booking SET is_cancelled = 1 WHERE booking_id = ?1", nativeQuery = true)
