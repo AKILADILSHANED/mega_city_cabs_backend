@@ -63,7 +63,7 @@ public class bookingIMPL implements customerBooking {
                         null
                 );
                 bookingRepository.save(bookingObj);
-                return "Booking request is completed successfully!";
+                return "Booking request is completed successfully with Booking ID: " + newBookingId + "!";
             }catch (Exception e){
                 //return "An error occurred while initiating the booking. Please try again later!";
                 return e.getMessage();
