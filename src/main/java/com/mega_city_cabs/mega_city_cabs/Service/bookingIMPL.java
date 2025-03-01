@@ -1,17 +1,21 @@
 package com.mega_city_cabs.mega_city_cabs.Service;
 
+import com.mega_city_cabs.mega_city_cabs.DTO.bookingHistoryDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.cancelBookingDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.newBookingDTO;
 import com.mega_city_cabs.mega_city_cabs.Entity.booking;
 import com.mega_city_cabs.mega_city_cabs.Repository.adminRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.bookingRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.customerRepo;
+import com.mega_city_cabs.mega_city_cabs.SqlMappers.bookingHistoryMapper;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class bookingIMPL implements customerBooking {
@@ -28,9 +32,13 @@ public class bookingIMPL implements customerBooking {
     @Autowired
     adminRepo admin;
 
+    @Autowired
+    JdbcTemplate template;
+
     @Transactional
     @Override
     public String newBooking(newBookingDTO newBooking) {
+
 
         String newBookingId;
 
@@ -147,5 +155,12 @@ public class bookingIMPL implements customerBooking {
         }catch (Exception e){
             return e.getMessage();
         }
+    }
+
+    @Override
+    public List<bookingHistoryDTO> bookingHistory() {
+        String sessionCusId = session.getAttribute("customer_id").toString();
+        String Sql = "SELECT b.booking_id AS 'Booking ID', b.booking_date AS 'Date', b.booking_type AS 'Type', b.pickup_location AS 'Pick Up', b.destination AS 'Destination', COALESCE(V.vehicle_number, 'No Vehicle assigned') AS 'Vehicle', COALESCE(DV.first_name, 'Driver not assigned') AS 'Driver' FROM booking b LEFT JOIN vehicle_assignment VS ON b.booking_id = VS.booking_id LEFT JOIN vehicle V ON VS.vehicle_id = V.vehicle_id LEFT JOIN driver_assignment DS ON b.booking_id = DS.booking_id LEFT JOIN driver DV ON DS.driver_id = DV.driver_id WHERE b.customer_id = ?";
+        return template.query(Sql,new bookingHistoryMapper(),new Object[]{sessionCusId});
     }
 }

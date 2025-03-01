@@ -26,6 +26,7 @@ public class customer {
         return customerServices.customerRegister(registerCustomer);
     }
 
+    @CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
     @GetMapping("/pending-registrations")
     private List<pendingCustomerRegistrationsDTO> pendingRegistrations(){
         return customerServices.pendingRegistrations();

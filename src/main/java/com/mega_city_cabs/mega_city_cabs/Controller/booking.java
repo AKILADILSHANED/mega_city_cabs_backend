@@ -1,10 +1,13 @@
 package com.mega_city_cabs.mega_city_cabs.Controller;
 
+import com.mega_city_cabs.mega_city_cabs.DTO.bookingHistoryDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.cancelBookingDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.newBookingDTO;
 import com.mega_city_cabs.mega_city_cabs.Service.bookingIMPL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin(
@@ -31,5 +34,10 @@ public class booking {
     @GetMapping("/cancelBooking")
     private String cancelBooking(@RequestParam String bookingId){
         return booking.cancelBooking(bookingId);
+    }
+
+    @GetMapping("/booking-history")
+    private List<bookingHistoryDTO> bookingHistory(){
+        return booking.bookingHistory();
     }
 }
