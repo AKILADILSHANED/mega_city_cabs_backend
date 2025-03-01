@@ -1,5 +1,6 @@
 package com.mega_city_cabs.mega_city_cabs.Controller;
 
+import com.mega_city_cabs.mega_city_cabs.DTO.approveBookingDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.bookingHistoryDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.cancelBookingDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.newBookingDTO;
@@ -39,5 +40,11 @@ public class booking {
     @GetMapping("/booking-history")
     private List<bookingHistoryDTO> bookingHistory(){
         return booking.bookingHistory();
+    }
+
+    @GetMapping("/booking-approval")
+    @CrossOrigin(origins = "http://localhost:3001")
+    private List<approveBookingDTO> approveBookings(){
+        return booking.approveBookings();
     }
 }
