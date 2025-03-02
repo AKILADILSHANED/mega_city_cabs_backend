@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @EnableJpaRepositories
 public interface driverRepo extends JpaRepository<driver,String> {
@@ -21,4 +23,9 @@ public interface driverRepo extends JpaRepository<driver,String> {
     @Modifying
     @Query(value = "UPDATE driver SET is_deleted = 1 WHERE driver_id = ?1", nativeQuery = true)
     public int removeDriver(String driverId);
+
+    @Query(value = "SELECT * FROM driver", nativeQuery = true)
+    public List<driver> getDriverDataForAssign();
+
+
 }

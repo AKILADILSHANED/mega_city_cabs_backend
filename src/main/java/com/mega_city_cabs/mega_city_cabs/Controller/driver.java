@@ -1,11 +1,14 @@
 package com.mega_city_cabs.mega_city_cabs.Controller;
 
+import com.mega_city_cabs.mega_city_cabs.DTO.driverDataForAssignDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.driverRegisterDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.driverSearchDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.driverUpdateDTO;
 import com.mega_city_cabs.mega_city_cabs.Service.driverServiceIMPL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -33,5 +36,11 @@ public class driver {
     @PostMapping("/driver-remove")
     private String removeDriver(@RequestParam String driverId){
         return driverService.removeDriver(driverId);
+    }
+
+    @GetMapping("/get-driver-data")
+    @CrossOrigin(origins = "http://localhost:3001")
+    private List<driverDataForAssignDTO> getDriverDataForAssign(){
+        return driverService.getDriverDataForAssign();
     }
 }

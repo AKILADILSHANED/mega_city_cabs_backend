@@ -1,5 +1,6 @@
 package com.mega_city_cabs.mega_city_cabs.Service;
 
+import com.mega_city_cabs.mega_city_cabs.DTO.driverDataForAssignDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.driverRegisterDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.driverSearchDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.driverUpdateDTO;
@@ -10,6 +11,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -149,5 +152,20 @@ public class driverServiceIMPL implements driverService{
         }catch (Exception e){
             return e.getMessage();
         }
+    }
+
+    @Override
+    public List<driverDataForAssignDTO> getDriverDataForAssign() {
+        List<driver> driverList = driverRepository.getDriverDataForAssign();
+        List<driverDataForAssignDTO> driverDataList = new ArrayList<>();
+        for (driver driverObj : driverList){
+            driverDataForAssignDTO newObjectDriver = new driverDataForAssignDTO(
+                    driverObj.getDriverId(),
+                    driverObj.getFirstName(),
+                    driverObj.getLastName()
+            );
+            driverDataList.add(newObjectDriver);
+        }
+        return driverDataList;
     }
 }

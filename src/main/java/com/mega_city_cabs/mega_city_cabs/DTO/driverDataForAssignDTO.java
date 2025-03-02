@@ -1,16 +1,14 @@
 package com.mega_city_cabs.mega_city_cabs.DTO;
 
-import jakarta.persistence.Column;
-
-public class driverDataForAssign {
+public class driverDataForAssignDTO {
     private String driverId;
     private String firstName;
     private String lastName;
 
-    public driverDataForAssign() {
+    public driverDataForAssignDTO() {
     }
 
-    public driverDataForAssign(String driverId, String firstName, String lastName) {
+    public driverDataForAssignDTO(String driverId, String firstName, String lastName) {
         this.driverId = driverId;
         this.firstName = firstName;
         this.lastName = lastName;
