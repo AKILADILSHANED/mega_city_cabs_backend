@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RequestMapping("/api/v1/driver")
 public class driver {
 
@@ -42,5 +42,11 @@ public class driver {
     @CrossOrigin(origins = "http://localhost:3001")
     private List<driverDataForAssignDTO> getDriverDataForAssign(){
         return driverService.getDriverDataForAssign();
+    }
+
+    @PostMapping("/assign-driver")
+    @CrossOrigin(origins = "http://localhost:3001")
+    private String assignDriver(@RequestParam String driverId, String bookingId){
+        return driverService.assignDriver(driverId, bookingId);
     }
 }

@@ -1,12 +1,15 @@
 package com.mega_city_cabs.mega_city_cabs.Service;
 
-import com.mega_city_cabs.mega_city_cabs.DTO.driverDataForAssignDTO;
-import com.mega_city_cabs.mega_city_cabs.DTO.driverRegisterDTO;
-import com.mega_city_cabs.mega_city_cabs.DTO.driverSearchDTO;
-import com.mega_city_cabs.mega_city_cabs.DTO.driverUpdateDTO;
+import com.mega_city_cabs.mega_city_cabs.DTO.*;
+import com.mega_city_cabs.mega_city_cabs.Entity.DriverAssignment;
+import com.mega_city_cabs.mega_city_cabs.Entity.administrator;
+import com.mega_city_cabs.mega_city_cabs.Entity.booking;
 import com.mega_city_cabs.mega_city_cabs.Entity.driver;
 import com.mega_city_cabs.mega_city_cabs.Repository.adminRepo;
+import com.mega_city_cabs.mega_city_cabs.Repository.bookingRepo;
+import com.mega_city_cabs.mega_city_cabs.Repository.driverAssignmentRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.driverRepo;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +25,16 @@ public class driverServiceIMPL implements driverService{
     driverRepo driverRepository;
 
     @Autowired
+    driverAssignmentRepo driverAssignment;
+
+    @Autowired
+    HttpSession session;
+
+    @Autowired
     adminRepo administratorRepo;
+
+    @Autowired
+    bookingRepo booking;
 
     @Override
     public String registerDriver(driverRegisterDTO driverRegister) {
@@ -167,5 +179,41 @@ public class driverServiceIMPL implements driverService{
             driverDataList.add(newObjectDriver);
         }
         return driverDataList;
+    }
+
+    @Transactional
+    @Override
+    public String assignDriver(String driverId, String bookingId) {
+
+        String newAssignmentId = null;
+
+        //Get last assignment id form driver assignment table.
+        String lastAssignmentId = driverAssignment.getLastDriverAssignmentId();
+        if(lastAssignmentId == null){
+            newAssignmentId = "DASGN00001";
+        }else{
+            int newNumericId = Integer.parseInt(lastAssignmentId.replace("DASGN", "")) + 1 ;
+            newAssignmentId = String.format("DASGN%05d", newNumericId);
+        }
+
+        try{
+            String sessionAdmin = session.getAttribute("admin_id").toString();
+            driver driverObject = driverRepository.findById(driverId).get();
+            
+            administrator adminObject = administratorRepo.findById(sessionAdmin).get();
+            booking bookingObject = booking.findById(bookingId).get();
+
+            DriverAssignment assignment = new DriverAssignment(
+                    newAssignmentId,
+                    LocalDateTime.now(),
+                    adminObject,
+                    driverObject,
+                    bookingObject
+            );
+            driverAssignment.save(assignment);
+            return "Driver assigned successfully with Assignment ID: " + newAssignmentId + " for BookingID: " + bookingId;
+        }catch (Exception e){
+            return "An error occurred while assigning the driver. Please contact administrator!";
+        }
     }
 }

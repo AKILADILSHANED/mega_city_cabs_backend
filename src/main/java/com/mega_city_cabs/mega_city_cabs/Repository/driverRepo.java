@@ -26,6 +26,4 @@ public interface driverRepo extends JpaRepository<driver,String> {
 
     @Query(value = "SELECT * FROM driver", nativeQuery = true)
     public List<driver> getDriverDataForAssign();
-
-
 }
