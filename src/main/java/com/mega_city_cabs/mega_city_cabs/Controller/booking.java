@@ -47,4 +47,16 @@ public class booking {
     private List<approveBookingDTO> approveBookings(){
         return booking.approveBookings();
     }
+
+    @GetMapping("/check-approval")
+    @CrossOrigin(origins = "http://localhost:3001")
+    private String checkApproval(@RequestParam String bookingId){
+        return booking.checkApproval(bookingId);
+    }
+
+    @GetMapping("/rejectBooking")
+    @CrossOrigin(origins = "http://localhost:3001")
+    private String rejectBooking(@RequestParam String bookingId){
+        return booking.rejectBooking(bookingId);
+    }
 }

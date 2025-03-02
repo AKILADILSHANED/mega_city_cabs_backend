@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @EnableJpaRepositories
 public interface vehicleRepo extends JpaRepository<vehicle,String> {
@@ -24,4 +26,7 @@ public interface vehicleRepo extends JpaRepository<vehicle,String> {
     @Transactional
     @Query(value = "UPDATE vehicle SET is_deleted = 1 WHERE vehicle_id = ?1", nativeQuery = true)
     public int deleteVehicle(String vehicleId);
+
+    @Query(value = "SELECT * FROM `vehicle` WHERE is_deleted = 0", nativeQuery = true)
+    public List<vehicle> vehicleList();
 }

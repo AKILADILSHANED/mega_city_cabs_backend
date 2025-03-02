@@ -199,7 +199,7 @@ public class driverServiceIMPL implements driverService{
         try{
             String sessionAdmin = session.getAttribute("admin_id").toString();
             driver driverObject = driverRepository.findById(driverId).get();
-            
+
             administrator adminObject = administratorRepo.findById(sessionAdmin).get();
             booking bookingObject = booking.findById(bookingId).get();
 
