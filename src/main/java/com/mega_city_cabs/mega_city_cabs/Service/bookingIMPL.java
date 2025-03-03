@@ -176,8 +176,11 @@ public class bookingIMPL implements customerBooking {
     public String checkApproval(String bookingId) {
         String returnMessage = null;
         String Sql = "SELECT bk.booking_id, dasg.assignment_id, vasg.assignment_id FROM booking bk LEFT JOIN driver_assignment dasg ON bk.booking_id = dasg.booking_id LEFT JOIN vehicle_assignment vasg ON bk.booking_id = vasg.booking_id WHERE bk.booking_id = ?";
-        List<checkBookingApprovalDTO> resultSet = template.query(Sql,new checkApprovalStatusMapper(), new Object[]{bookingId});
+        List<checkBookingApprovalDTO> resultSet = template.query(Sql,new checkApprovalStatusMapper(), new Object[]{bookingId.trim()});
         checkBookingApprovalDTO result = resultSet.get(0);
+        if(resultSet.isEmpty()){
+            return "No record found for provided Booking Id. Please check!";
+        }else {
             if(result.getAssignmentId() == null || result.getAssignmentIdVehicle() == null){
                 returnMessage = "Please assign both Driver and Vehicle before approve the booking!";
             }else{
@@ -185,6 +188,7 @@ public class bookingIMPL implements customerBooking {
                 bookingRepository.approveBooking(session.getAttribute("admin_id").toString(), bookingId);
                 returnMessage = "Booking ID: " + bookingId + " approved successfully";
             }
+        }
         return returnMessage;
     }
 

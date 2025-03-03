@@ -27,4 +27,7 @@ public interface bookingRepo extends JpaRepository<booking, String> {
     @Query(value = "UPDATE booking SET is_cancelled = 2 WHERE booking_id = ?1", nativeQuery = true)
     public int rejectBooking(String bookingId);
 
+    @Query(value = "SELECT customer_id FROM booking WHERE booking_id = ?1", nativeQuery = true)
+    public String getCustomerIDFromBooking(String bookingId);
+
 }
