@@ -4,9 +4,11 @@ import com.mega_city_cabs.mega_city_cabs.Entity.booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@EnableJpaRepositories
 public interface bookingRepo extends JpaRepository<booking, String> {
 
     @Query(value = "SELECT booking_id FROM booking ORDER BY booking_date DESC LIMIT 1", nativeQuery = true)
@@ -29,5 +31,8 @@ public interface bookingRepo extends JpaRepository<booking, String> {
 
     @Query(value = "SELECT customer_id FROM booking WHERE booking_id = ?1", nativeQuery = true)
     public String getCustomerIDFromBooking(String bookingId);
+
+    @Query(value = "SELECT * FROM booking WHERE booking_id = ?1", nativeQuery = true)
+    public booking getBookingObject(String bookingId);
 
 }

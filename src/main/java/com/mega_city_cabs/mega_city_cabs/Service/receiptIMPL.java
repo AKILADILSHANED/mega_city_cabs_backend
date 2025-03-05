@@ -2,6 +2,8 @@ package com.mega_city_cabs.mega_city_cabs.Service;
 
 import com.mega_city_cabs.mega_city_cabs.DTO.bookingDetailsForReceipt;
 import com.mega_city_cabs.mega_city_cabs.DTO.receiptDTO;
+import com.mega_city_cabs.mega_city_cabs.Entity.administrator;
+import com.mega_city_cabs.mega_city_cabs.Entity.booking;
 import com.mega_city_cabs.mega_city_cabs.Entity.customer;
 import com.mega_city_cabs.mega_city_cabs.Entity.receipt;
 import com.mega_city_cabs.mega_city_cabs.Repository.adminRepo;
@@ -30,7 +32,7 @@ public class receiptIMPL implements receiptService{
     adminRepo admin;
 
     @Autowired
-    bookingRepo booking;
+    bookingRepo booking_repo;
 
     @Autowired
     HttpSession session;
@@ -46,7 +48,10 @@ public class receiptIMPL implements receiptService{
     @Override
     public String issueReceipt(receiptDTO receiptDto) {
 
-        String newReceiptNumber = null;
+        String newReceiptNumber;
+        customer customerObj;
+        booking bookingObj;
+
         //Generate Receipt Number.
         try{
             String lastReceipt = receiptRepo.getLastReceiptNumber();
@@ -56,10 +61,18 @@ public class receiptIMPL implements receiptService{
                 int newNumericPart = Integer.parseInt(lastReceipt.replace("RCPT", "")) + 1;
                 newReceiptNumber = String.format("RCPT%05d", newNumericPart);
             }
-        }catch (Exception e){
-            return "An error occurred fetching receipt number. Please contact administrator!";
-        }
-        try{
+        //Getting Customer Object and Booking Object.
+
+            //Get customer object/
+            customerObj = customerObject.getCustomerObject(receiptDto.getCustomerId());
+            if(customerObj == null){
+                throw new RuntimeException("Customer not found!");
+            }else{
+                bookingObj = booking_repo.getBookingObject(receiptDto.getBookingId());
+                if(bookingObj == null){
+                    throw new RuntimeException("Booking not found!");
+                }
+            }
             receipt receiptObject = new receipt(
                     newReceiptNumber,
                     LocalDateTime.now(),
@@ -67,15 +80,14 @@ public class receiptIMPL implements receiptService{
                     receiptDto.getTaxRate(),
                     receiptDto.getFare(),
                     admin.findById(session.getAttribute("admin_id").toString()).get(),
-                    customerObject.findById(receiptDto.getCustomerId()).get(),
-                    booking.findById(receiptDto.getBookingId()).get()
+                    customerObj,
+                    bookingObj
             );
             receiptRepo.save(receiptObject);
             return "Receipt issued successfully!";
 
         }catch(Exception e){
             return e.getMessage();
-            //return "An error occurred while updating receipt data. Please contact administrator!";
         }
     }
 
@@ -115,5 +127,7 @@ public class receiptIMPL implements receiptService{
             );
             return result;
         }
+
+
     }
 }

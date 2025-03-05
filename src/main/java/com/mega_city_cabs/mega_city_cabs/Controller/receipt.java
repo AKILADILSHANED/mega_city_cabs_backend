@@ -4,6 +4,7 @@ import com.mega_city_cabs.mega_city_cabs.DTO.bookingDetailsForReceipt;
 import com.mega_city_cabs.mega_city_cabs.DTO.receiptDTO;
 import com.mega_city_cabs.mega_city_cabs.Service.receiptIMPL;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

@@ -19,4 +19,5 @@ public interface customerRepo extends JpaRepository<customer, String> {
 
     @Query(value = "SELECT * FROM customer WHERE customer_id = ?1", nativeQuery = true)
     public customer getCustomerObject(String customerId);
+
 }

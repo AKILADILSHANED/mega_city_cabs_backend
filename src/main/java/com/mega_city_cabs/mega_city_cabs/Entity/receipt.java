@@ -25,15 +25,15 @@ public class receipt {
     private double fare;
 
     @ManyToOne()
-    @JoinColumn(name = "admin_id")
+    @JoinColumn(name = "admin_id", nullable = false)
     private administrator admin;
 
     @ManyToOne()
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "customer_id", nullable = false)
     private customer customer;
 
     @ManyToOne()
-    @JoinColumn(name = "booking_id")
+    @JoinColumn(name = "booking_id", nullable = false)
     private booking booking;
 
     public receipt() {
