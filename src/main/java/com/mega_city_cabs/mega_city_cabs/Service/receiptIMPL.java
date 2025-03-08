@@ -1,17 +1,23 @@
 package com.mega_city_cabs.mega_city_cabs.Service;
 
 import com.mega_city_cabs.mega_city_cabs.DTO.bookingDetailsForReceipt;
+import com.mega_city_cabs.mega_city_cabs.DTO.receiptConfirmDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.receiptDTO;
+import com.mega_city_cabs.mega_city_cabs.DTO.receiptPrintDTO;
 import com.mega_city_cabs.mega_city_cabs.Entity.administrator;
 import com.mega_city_cabs.mega_city_cabs.Entity.booking;
 import com.mega_city_cabs.mega_city_cabs.Entity.customer;
 import com.mega_city_cabs.mega_city_cabs.Entity.receipt;
+import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.bookingNotFoundException;
+import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.customerNotFoundException;
+import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.receiptDetailsNotFoundException;
 import com.mega_city_cabs.mega_city_cabs.Repository.adminRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.bookingRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.customerRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.receiptRepository;
 import com.mega_city_cabs.mega_city_cabs.SqlMappers.customerMapper;
 import com.mega_city_cabs.mega_city_cabs.SqlMappers.getBookingDetailsForReceiptMapper;
+import com.mega_city_cabs.mega_city_cabs.SqlMappers.receiptDetailsMapper;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +52,7 @@ public class receiptIMPL implements receiptService{
 
     @Transactional
     @Override
-    public String issueReceipt(receiptDTO receiptDto) {
+    public receiptConfirmDTO issueReceipt(receiptDTO receiptDto) {
 
         String newReceiptNumber;
         customer customerObj;
@@ -66,11 +72,11 @@ public class receiptIMPL implements receiptService{
             //Get customer object/
             customerObj = customerObject.getCustomerObject(receiptDto.getCustomerId());
             if(customerObj == null){
-                throw new RuntimeException("Customer not found!");
+                throw new customerNotFoundException("Customer not found!");
             }else{
                 bookingObj = booking_repo.getBookingObject(receiptDto.getBookingId());
                 if(bookingObj == null){
-                    throw new RuntimeException("Booking not found!");
+                    throw new bookingNotFoundException("Booking not found!");
                 }
             }
             receipt receiptObject = new receipt(
@@ -84,10 +90,22 @@ public class receiptIMPL implements receiptService{
                     bookingObj
             );
             receiptRepo.save(receiptObject);
-            return "Receipt issued successfully!";
+            return new receiptConfirmDTO(
+                    newReceiptNumber,
+                    "0"
+            );
 
-        }catch(Exception e){
-            return e.getMessage();
+
+        }catch(customerNotFoundException e){
+             return new receiptConfirmDTO(
+                     null,
+                     "1"
+             );
+        }catch (bookingNotFoundException e){
+            return new receiptConfirmDTO(
+                    null,
+                    "2"
+            );
         }
     }
 
@@ -127,7 +145,47 @@ public class receiptIMPL implements receiptService{
             );
             return result;
         }
+    }
 
+    @Override
+    public receiptPrintDTO getReceiptDetails(String receiptNumber, int vat) {
+        try{
+            System.out.println(receiptNumber);
+            String Sql = "SELECT rec.receipt_number, rec.receipt_date, rec.payment_type,rec.tax_rate, rec.fare, rec.customer_id, rec.booking_id, rec.admin_id, bk.pickup_location, bk.destination FROM receipt rec LEFT JOIN booking bk ON rec.booking_id = bk.booking_id WHERE rec.receipt_number = ?";
+            List<receiptPrintDTO> receiptDetailsList = template.query(Sql, new receiptDetailsMapper(),new Object[]{receiptNumber});
+            receiptPrintDTO receiptDetailObject = receiptDetailsList.get(0);
+            if(receiptDetailObject != null){
+                //Calculate VAT amount.
+                double VatAmount = Math.round(receiptDetailObject.getFare() * ((double) vat /100));
+                double serviceCharge = Math.round(receiptDetailObject.getFare() * ((double) 10 /100));
+                double totalDue = Math.round(receiptDetailObject.getFare() + VatAmount + serviceCharge);
+
+                receiptDetailObject.setVatAmount(VatAmount);
+                receiptDetailObject.setServiceCharge(serviceCharge);
+                receiptDetailObject.setTotalDue(totalDue);
+
+                return receiptDetailObject;
+            }else{
+                throw new receiptDetailsNotFoundException("No receipt details found!");
+            }
+        }catch(receiptDetailsNotFoundException e){
+                return new receiptPrintDTO(
+                        null,
+                        null,
+                        null,
+                        0,
+                        0,
+                        null,
+                        null,
+                        null,
+                        0,
+                        0,
+                        0,
+                        null,
+                        null,
+                        1
+                );
+        }
 
     }
 }
