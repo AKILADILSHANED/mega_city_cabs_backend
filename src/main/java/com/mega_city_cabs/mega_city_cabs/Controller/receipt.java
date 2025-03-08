@@ -1,7 +1,9 @@
 package com.mega_city_cabs.mega_city_cabs.Controller;
 
 import com.mega_city_cabs.mega_city_cabs.DTO.bookingDetailsForReceipt;
+import com.mega_city_cabs.mega_city_cabs.DTO.receiptConfirmDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.receiptDTO;
+import com.mega_city_cabs.mega_city_cabs.DTO.receiptPrintDTO;
 import com.mega_city_cabs.mega_city_cabs.Service.receiptIMPL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,12 +17,17 @@ public class receipt {
     receiptIMPL receipt;
 
     @PostMapping("/new-receipt")
-    private String issueReceipt(@RequestBody receiptDTO receiptDto){
+    private receiptConfirmDTO issueReceipt(@RequestBody receiptDTO receiptDto){
         return receipt.issueReceipt(receiptDto);
     }
 
     @GetMapping("/booking-details")
     private bookingDetailsForReceipt getBookingDetailsForReceipt(@RequestParam String bookingId){
         return receipt.getBookingDetailsForReceipt(bookingId);
+    }
+
+    @GetMapping("/receipt-print")
+    private receiptPrintDTO getReceiptDetails(@RequestParam String receiptNumber, int vat){
+        return receipt.getReceiptDetails(receiptNumber, vat);
     }
 }
