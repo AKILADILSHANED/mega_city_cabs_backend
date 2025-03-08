@@ -148,7 +148,7 @@ public class receiptIMPL implements receiptService{
     }
 
     @Override
-    public receiptPrintDTO getReceiptDetails(String receiptNumber, int vat) {
+    public receiptPrintDTO getReceiptDetails(String receiptNumber) {
         try{
             System.out.println(receiptNumber);
             String Sql = "SELECT rec.receipt_number, rec.receipt_date, rec.payment_type,rec.tax_rate, rec.fare, rec.customer_id, rec.booking_id, rec.admin_id, bk.pickup_location, bk.destination FROM receipt rec LEFT JOIN booking bk ON rec.booking_id = bk.booking_id WHERE rec.receipt_number = ?";
@@ -156,7 +156,7 @@ public class receiptIMPL implements receiptService{
             receiptPrintDTO receiptDetailObject = receiptDetailsList.get(0);
             if(receiptDetailObject != null){
                 //Calculate VAT amount.
-                double VatAmount = Math.round(receiptDetailObject.getFare() * ((double) vat /100));
+                double VatAmount = Math.round(receiptDetailObject.getFare() * ((double) receiptDetailObject.getTaxRate() /100));
                 double serviceCharge = Math.round(receiptDetailObject.getFare() * ((double) 10 /100));
                 double totalDue = Math.round(receiptDetailObject.getFare() + VatAmount + serviceCharge);
 
@@ -187,5 +187,47 @@ public class receiptIMPL implements receiptService{
                 );
         }
 
+    }
+
+    @Override
+    public receiptPrintDTO receiptReprint(String receiptNumber) {
+        try{
+            System.out.println(receiptNumber);
+            String Sql = "SELECT rec.receipt_number, rec.receipt_date, rec.payment_type,rec.tax_rate, rec.fare, rec.customer_id, rec.booking_id, rec.admin_id, bk.pickup_location, bk.destination FROM receipt rec LEFT JOIN booking bk ON rec.booking_id = bk.booking_id WHERE rec.receipt_number = ?";
+            List<receiptPrintDTO> receiptDetailsList = template.query(Sql, new receiptDetailsMapper(),new Object[]{receiptNumber});
+            
+            if(!receiptDetailsList.isEmpty()){
+                receiptPrintDTO receiptDetailObject = receiptDetailsList.get(0);
+                //Calculate VAT amount.
+                double VatAmount = Math.round(receiptDetailObject.getFare() * ((double) receiptDetailObject.getTaxRate() /100));
+                double serviceCharge = Math.round(receiptDetailObject.getFare() * ((double) 10 /100));
+                double totalDue = Math.round(receiptDetailObject.getFare() + VatAmount + serviceCharge);
+
+                receiptDetailObject.setVatAmount(VatAmount);
+                receiptDetailObject.setServiceCharge(serviceCharge);
+                receiptDetailObject.setTotalDue(totalDue);
+
+                return receiptDetailObject;
+            }else{
+                throw new receiptDetailsNotFoundException("No receipt details found!");
+            }
+        }catch(receiptDetailsNotFoundException e){
+            return new receiptPrintDTO(
+                    null,
+                    null,
+                    null,
+                    0,
+                    0,
+                    null,
+                    null,
+                    null,
+                    0,
+                    0,
+                    0,
+                    null,
+                    null,
+                    1
+            );
+        }
     }
 }

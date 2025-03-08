@@ -10,5 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface receiptService {
     public receiptConfirmDTO issueReceipt(receiptDTO receiptDto);
     public bookingDetailsForReceipt getBookingDetailsForReceipt(String bookingId);
-    public receiptPrintDTO getReceiptDetails(String receiptNumber, int vat);
+    public receiptPrintDTO getReceiptDetails(String receiptNumber);
+    public receiptPrintDTO receiptReprint(String receiptNumber);
+
 }

@@ -27,7 +27,12 @@ public class receipt {
     }
 
     @GetMapping("/receipt-print")
-    private receiptPrintDTO getReceiptDetails(@RequestParam String receiptNumber, int vat){
-        return receipt.getReceiptDetails(receiptNumber, vat);
+    private receiptPrintDTO getReceiptDetails(@RequestParam String receiptNumber){
+        return receipt.getReceiptDetails(receiptNumber);
+    }
+
+    @GetMapping("/receipt-reprint")
+    private receiptPrintDTO receiptReprint(@RequestParam String receiptNumber){
+        return receipt.receiptReprint(receiptNumber);
     }
 }
