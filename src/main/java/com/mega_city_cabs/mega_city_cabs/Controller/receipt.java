@@ -35,4 +35,9 @@ public class receipt {
     private receiptPrintDTO receiptReprint(@RequestParam String receiptNumber){
         return receipt.receiptReprint(receiptNumber);
     }
+
+    @PostMapping("/receipt-delete")
+    private String deleteReceipt(@RequestParam String receiptNumber){
+        return receipt.deleteReceipt(receiptNumber);
+    }
 }

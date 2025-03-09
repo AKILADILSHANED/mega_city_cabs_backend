@@ -12,5 +12,6 @@ public interface receiptService {
     public bookingDetailsForReceipt getBookingDetailsForReceipt(String bookingId);
     public receiptPrintDTO getReceiptDetails(String receiptNumber);
     public receiptPrintDTO receiptReprint(String receiptNumber);
+    public String deleteReceipt(String receiptNumber);
 
 }

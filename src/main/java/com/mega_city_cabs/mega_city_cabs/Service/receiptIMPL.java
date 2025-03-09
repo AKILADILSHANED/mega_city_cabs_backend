@@ -4,24 +4,22 @@ import com.mega_city_cabs.mega_city_cabs.DTO.bookingDetailsForReceipt;
 import com.mega_city_cabs.mega_city_cabs.DTO.receiptConfirmDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.receiptDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.receiptPrintDTO;
-import com.mega_city_cabs.mega_city_cabs.Entity.administrator;
 import com.mega_city_cabs.mega_city_cabs.Entity.booking;
 import com.mega_city_cabs.mega_city_cabs.Entity.customer;
 import com.mega_city_cabs.mega_city_cabs.Entity.receipt;
 import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.bookingNotFoundException;
 import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.customerNotFoundException;
+import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.receiptDeletedException;
 import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.receiptDetailsNotFoundException;
 import com.mega_city_cabs.mega_city_cabs.Repository.adminRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.bookingRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.customerRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.receiptRepository;
-import com.mega_city_cabs.mega_city_cabs.SqlMappers.customerMapper;
 import com.mega_city_cabs.mega_city_cabs.SqlMappers.getBookingDetailsForReceiptMapper;
 import com.mega_city_cabs.mega_city_cabs.SqlMappers.receiptDetailsMapper;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +67,7 @@ public class receiptIMPL implements receiptService{
             }
         //Getting Customer Object and Booking Object.
 
-            //Get customer object/
+            //Get customer object
             customerObj = customerObject.getCustomerObject(receiptDto.getCustomerId());
             if(customerObj == null){
                 throw new customerNotFoundException("Customer not found!");
@@ -84,6 +82,7 @@ public class receiptIMPL implements receiptService{
                     LocalDateTime.now(),
                     receiptDto.getPaymentType(),
                     receiptDto.getTaxRate(),
+                    0,
                     receiptDto.getFare(),
                     admin.findById(session.getAttribute("admin_id").toString()).get(),
                     customerObj,
@@ -150,7 +149,7 @@ public class receiptIMPL implements receiptService{
     @Override
     public receiptPrintDTO getReceiptDetails(String receiptNumber) {
         try{
-            System.out.println(receiptNumber);
+
             String Sql = "SELECT rec.receipt_number, rec.receipt_date, rec.payment_type,rec.tax_rate, rec.fare, rec.customer_id, rec.booking_id, rec.admin_id, bk.pickup_location, bk.destination FROM receipt rec LEFT JOIN booking bk ON rec.booking_id = bk.booking_id WHERE rec.receipt_number = ?";
             List<receiptPrintDTO> receiptDetailsList = template.query(Sql, new receiptDetailsMapper(),new Object[]{receiptNumber});
             receiptPrintDTO receiptDetailObject = receiptDetailsList.get(0);
@@ -192,24 +191,32 @@ public class receiptIMPL implements receiptService{
     @Override
     public receiptPrintDTO receiptReprint(String receiptNumber) {
         try{
-            System.out.println(receiptNumber);
-            String Sql = "SELECT rec.receipt_number, rec.receipt_date, rec.payment_type,rec.tax_rate, rec.fare, rec.customer_id, rec.booking_id, rec.admin_id, bk.pickup_location, bk.destination FROM receipt rec LEFT JOIN booking bk ON rec.booking_id = bk.booking_id WHERE rec.receipt_number = ?";
-            List<receiptPrintDTO> receiptDetailsList = template.query(Sql, new receiptDetailsMapper(),new Object[]{receiptNumber});
-            
-            if(!receiptDetailsList.isEmpty()){
-                receiptPrintDTO receiptDetailObject = receiptDetailsList.get(0);
-                //Calculate VAT amount.
-                double VatAmount = Math.round(receiptDetailObject.getFare() * ((double) receiptDetailObject.getTaxRate() /100));
-                double serviceCharge = Math.round(receiptDetailObject.getFare() * ((double) 10 /100));
-                double totalDue = Math.round(receiptDetailObject.getFare() + VatAmount + serviceCharge);
+            Integer deleteStatus = receiptRepo.checkReceiptDeletionStatus(receiptNumber);
+            if(deleteStatus == null){
+                throw new receiptDetailsNotFoundException("");
+            }
+            if(deleteStatus == 1){
+                throw new receiptDeletedException("");
+            }
+            else{
+                String Sql = "SELECT rec.receipt_number, rec.receipt_date, rec.payment_type,rec.tax_rate, rec.fare, rec.customer_id, rec.booking_id, rec.admin_id, bk.pickup_location, bk.destination FROM receipt rec LEFT JOIN booking bk ON rec.booking_id = bk.booking_id WHERE rec.receipt_number = ?";
+                List<receiptPrintDTO> receiptDetailsList = template.query(Sql, new receiptDetailsMapper(),new Object[]{receiptNumber});
 
-                receiptDetailObject.setVatAmount(VatAmount);
-                receiptDetailObject.setServiceCharge(serviceCharge);
-                receiptDetailObject.setTotalDue(totalDue);
+                if(!receiptDetailsList.isEmpty()){
+                    receiptPrintDTO receiptDetailObject = receiptDetailsList.get(0);
+                    //Calculate VAT amount.
+                    double VatAmount = Math.round(receiptDetailObject.getFare() * ((double) receiptDetailObject.getTaxRate() /100));
+                    double serviceCharge = Math.round(receiptDetailObject.getFare() * ((double) 10 /100));
+                    double totalDue = Math.round(receiptDetailObject.getFare() + VatAmount + serviceCharge);
 
-                return receiptDetailObject;
-            }else{
-                throw new receiptDetailsNotFoundException("No receipt details found!");
+                    receiptDetailObject.setVatAmount(VatAmount);
+                    receiptDetailObject.setServiceCharge(serviceCharge);
+                    receiptDetailObject.setTotalDue(totalDue);
+
+                    return receiptDetailObject;
+                }else{
+                    throw new receiptDetailsNotFoundException("No receipt details found!");
+                }
             }
         }catch(receiptDetailsNotFoundException e){
             return new receiptPrintDTO(
@@ -226,8 +233,47 @@ public class receiptIMPL implements receiptService{
                     0,
                     null,
                     null,
-                    1
+                    2 // No receipt found
             );
+        }catch (receiptDeletedException e){
+            return new receiptPrintDTO(
+                    null,
+                    null,
+                    null,
+                    0,
+                    0,
+                    null,
+                    null,
+                    null,
+                    0,
+                    0,
+                    0,
+                    null,
+                    null,
+                    1 //Receipt already deleted
+            );
+        }
+    }
+
+    @Transactional
+    @Override
+    public String deleteReceipt(String receiptNumber) {
+        try{
+            //Check whether the receipt is already deleted or not.
+            Integer deleteStatus = receiptRepo.checkReceiptDeletionStatus(receiptNumber);
+            if(deleteStatus == null){
+                throw new receiptDetailsNotFoundException("");
+            }
+            if(deleteStatus == 0){
+                int affectedRows = receiptRepo.deleteReceipt(receiptNumber);
+                return "Receipt number " + receiptNumber + " deleted successfully!";
+            }else{
+                    throw new receiptDeletedException("");
+            }
+        }catch (receiptDetailsNotFoundException e){
+            return "No receipt details found for provided Receipt NUmber!";
+        }catch (receiptDeletedException e){
+            return "This receipt number is already deleted!";
         }
     }
 }

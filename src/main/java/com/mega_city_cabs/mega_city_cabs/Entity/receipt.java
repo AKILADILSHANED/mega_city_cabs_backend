@@ -21,6 +21,9 @@ public class receipt {
     @Column(name = "Tax_Rate", nullable = false)
     private double taxRate;
 
+    @Column(name = "Is_Deleted", length = 1, nullable = false)
+    private int isDeleted;
+
     @Column(name = "Fare", length = 10, nullable = false)
     private double fare;
 
@@ -39,11 +42,12 @@ public class receipt {
     public receipt() {
     }
 
-    public receipt(String receiptNumber, LocalDateTime receiptDate, String paymentType, double taxRate, double fare, administrator admin, com.mega_city_cabs.mega_city_cabs.Entity.customer customer, com.mega_city_cabs.mega_city_cabs.Entity.booking booking) {
+    public receipt(String receiptNumber, LocalDateTime receiptDate, String paymentType, double taxRate, int isDeleted, double fare, administrator admin, com.mega_city_cabs.mega_city_cabs.Entity.customer customer, com.mega_city_cabs.mega_city_cabs.Entity.booking booking) {
         this.receiptNumber = receiptNumber;
         this.receiptDate = receiptDate;
         this.paymentType = paymentType;
         this.taxRate = taxRate;
+        this.isDeleted = isDeleted;
         this.fare = fare;
         this.admin = admin;
         this.customer = customer;
@@ -112,5 +116,13 @@ public class receipt {
 
     public void setBooking(com.mega_city_cabs.mega_city_cabs.Entity.booking booking) {
         this.booking = booking;
+    }
+
+    public int getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(int isDeleted) {
+        this.isDeleted = isDeleted;
     }
 }
