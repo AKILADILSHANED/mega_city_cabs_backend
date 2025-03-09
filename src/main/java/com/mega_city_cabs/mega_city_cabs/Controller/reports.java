@@ -2,6 +2,7 @@ package com.mega_city_cabs.mega_city_cabs.Controller;
 
 import com.mega_city_cabs.mega_city_cabs.DTO.bookingDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.customerDTO;
+import com.mega_city_cabs.mega_city_cabs.DTO.receiptReportDTO;
 import com.mega_city_cabs.mega_city_cabs.Service.reportIMPL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,5 +29,10 @@ public class reports {
     @GetMapping("/booking-report")
     private List<bookingDTO> getBookingReport(){
         return reports.getBookingReport();
+    }
+
+    @GetMapping("/receipt-report")
+    private List<receiptReportDTO> getReceiptReport(){
+        return reports.getReceiptReport();
     }
 }
