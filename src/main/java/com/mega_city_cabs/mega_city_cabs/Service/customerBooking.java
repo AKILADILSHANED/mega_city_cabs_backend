@@ -3,8 +3,7 @@ package com.mega_city_cabs.mega_city_cabs.Service;
 import com.mega_city_cabs.mega_city_cabs.DTO.approveBookingDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.bookingHistoryDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.cancelBookingDTO;
-import com.mega_city_cabs.mega_city_cabs.DTO.newBookingDTO;
-import org.springframework.web.bind.annotation.RequestParam;
+import com.mega_city_cabs.mega_city_cabs.DTO.newBookingDTO;import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 

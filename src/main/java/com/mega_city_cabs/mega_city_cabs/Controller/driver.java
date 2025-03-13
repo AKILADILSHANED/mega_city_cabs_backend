@@ -7,7 +7,6 @@ import com.mega_city_cabs.mega_city_cabs.DTO.driverUpdateDTO;
 import com.mega_city_cabs.mega_city_cabs.Service.driverServiceIMPL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController

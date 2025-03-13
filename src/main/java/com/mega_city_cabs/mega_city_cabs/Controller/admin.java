@@ -1,6 +1,5 @@
 package com.mega_city_cabs.mega_city_cabs.Controller;
 
-
 import com.mega_city_cabs.mega_city_cabs.Service.adminServiceIMPL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

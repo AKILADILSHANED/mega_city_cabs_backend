@@ -1,10 +1,11 @@
 package com.mega_city_cabs.mega_city_cabs.Service;
-
 import com.mega_city_cabs.mega_city_cabs.DTO.registerVehicleDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.vehicleDataForAssignDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.vehicleSearchDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.vehicleUpdateDTO;
 import com.mega_city_cabs.mega_city_cabs.Entity.*;
+import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.nullVehicleIdFoundException;
+import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.vehicleNotFoundException;
 import com.mega_city_cabs.mega_city_cabs.Repository.adminRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.bookingRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.vehicleAssignmentRepo;
@@ -20,10 +21,7 @@ import java.util.Optional;
 
 @Service
 public class vehicleServiceIMPL implements vehicleService{
-
     Optional<administrator> admin;
-
-
     @Autowired
     private vehicleRepo vehiclerepository;
     @Autowired
@@ -55,7 +53,6 @@ public class vehicleServiceIMPL implements vehicleService{
         }catch (Exception e){
             return e.getMessage();
         }
-
         //Get admin reference form database..
         try{
             admin = adminRepository.findById("ADMN001");
@@ -63,21 +60,28 @@ public class vehicleServiceIMPL implements vehicleService{
             return e.getMessage();
         }
 
-        //Create vehicle entity using the constructor.
-
-        vehicle registerVehicle = new vehicle(
-                vehicleId,
-                registerVehicleDTO.getVehicleNumber(),
-                registerVehicleDTO.getVehicleType(),
-                registerVehicleDTO.getVehicleModel(),
-                LocalDateTime.now(),
-                0,
-                admin.get()
-        );
         try{
-            vehiclerepository.save(registerVehicle);
-            return "Vehicle registered successfully with Vehicle ID: " + vehicleId;
-        }catch (Exception e){
+            if(registerVehicleDTO.getVehicleNumber() == null || registerVehicleDTO.getVehicleType() == null || registerVehicleDTO.getVehicleModel() == null){
+                throw new nullVehicleIdFoundException("Null values are not accepted. Please provide all details");
+            }else{
+                //Create vehicle entity using the constructor.
+                vehicle registerVehicle = new vehicle(
+                        vehicleId,
+                        registerVehicleDTO.getVehicleNumber(),
+                        registerVehicleDTO.getVehicleType(),
+                        registerVehicleDTO.getVehicleModel(),
+                        LocalDateTime.now(),
+                        0,
+                        admin.get()
+                );
+                try{
+                    vehiclerepository.save(registerVehicle);
+                    return "Vehicle registered successfully with Vehicle ID: " + vehicleId;
+                }catch (Exception e){
+                    return e.getMessage();
+                }
+            }
+        }catch (nullVehicleIdFoundException e){
             return e.getMessage();
         }
     }
@@ -85,60 +89,107 @@ public class vehicleServiceIMPL implements vehicleService{
     @Override
     public vehicleSearchDTO vehicleSearch(String vehicleId) {
         try{
-            Optional<vehicle> vehicleSearch = vehiclerepository.findById(vehicleId);
-
-            if(vehicleSearch.get().getDeleteStatus() == 1){
-                return null;
+            if(vehicleId == null){
+                throw new nullVehicleIdFoundException("Vehicle ID is null. Please provide a valid Vehicle ID!");
             }else{
-                vehicleSearchDTO vehicleSearchObject = new vehicleSearchDTO(
-                        vehicleSearch.get().getVehicleId(),
-                        vehicleSearch.get().getVehicleNumber(),
-                        vehicleSearch.get().getVehicleType(),
-                        vehicleSearch.get().getVehicleModel(),
-                        vehicleSearch.get().getRegisteredDate(),
-                        vehicleSearch.get().getAdmin()
-                );
-                return vehicleSearchObject;
+                Optional<vehicle> vehicleSearch = vehiclerepository.findById(vehicleId);
+                if(vehicleSearch.get().getDeleteStatus() == 1){
+                    vehicleSearchDTO vehicleSearchObject = new vehicleSearchDTO(
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            "This Vehicle is already deleted"
+                    );
+                    return vehicleSearchObject;
+                }else{
+                    vehicleSearchDTO vehicleSearchObject = new vehicleSearchDTO(
+                            vehicleSearch.get().getVehicleId(),
+                            vehicleSearch.get().getVehicleNumber(),
+                            vehicleSearch.get().getVehicleType(),
+                            vehicleSearch.get().getVehicleModel(),
+                            vehicleSearch.get().getRegisteredDate(),
+                            vehicleSearch.get().getAdmin(),
+                            null
+                    );
+                    return vehicleSearchObject;
+                }
             }
-
+        }catch (nullVehicleIdFoundException e){
+            vehicleSearchDTO vehicleSearchObject = new vehicleSearchDTO(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    e.getMessage()
+            );
+            return vehicleSearchObject;
         }catch (Exception e){
-            return null;
+            vehicleSearchDTO vehicleSearchObject = new vehicleSearchDTO(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    e.getMessage()
+            );
+            return vehicleSearchObject;
         }
     }
-
     @Override
     public String updateVehicle(vehicleUpdateDTO vehicleUpdate) {
         try{
-            int affectedRows = vehiclerepository.updateVehicleDetails(
-                    vehicleUpdate.getVehicleNumber(),
-                    vehicleUpdate.getVehicleType(),
-                    vehicleUpdate.getVehicleModel(),
-                    vehicleUpdate.getVehicleId()
-            );
-            if(affectedRows > 0){
-                return "Vehicle details successfully updated for Vehicle ID: " + vehicleUpdate.getVehicleId() + "!";
+            if(vehicleUpdate.getVehicleId() == null){
+                throw new nullVehicleIdFoundException("Vehicle ID is null. Please provide a valid Vehicle ID!");
             }else{
-                return "No vehicle details found for Vehicle ID: " + vehicleUpdate.getVehicleId() + "!";
+                int affectedRows = vehiclerepository.updateVehicleDetails(
+                        vehicleUpdate.getVehicleNumber(),
+                        vehicleUpdate.getVehicleType(),
+                        vehicleUpdate.getVehicleModel(),
+                        vehicleUpdate.getVehicleId()
+                );
+                if(affectedRows > 0){
+                    return "Vehicle details successfully updated for Vehicle ID: " + vehicleUpdate.getVehicleId() + "!";
+                }else{
+                    throw new vehicleNotFoundException("No vehicle details found for Vehicle ID: " + vehicleUpdate.getVehicleId() + "!");
+                }
             }
+        }catch (nullVehicleIdFoundException e){
+            return e.getMessage();
+        }catch (vehicleNotFoundException e){
+            return e.getMessage();
         }catch (Exception e){
             return "Error in updating vehicle details. Please contact administrator!";
         }
     }
-
     @Override
     public String deleteVehicle(String vehicleId) {
         try{
-            int affectedRow = vehiclerepository.deleteVehicle(vehicleId);
-            if(affectedRow > 0){
-                return "Vehicle ID: " + vehicleId + " deleted successfully!";
+            if(vehicleId == null){
+                throw new nullVehicleIdFoundException("Vehicle ID is null. PLease provide a valid vehicle id!");
             }else{
-                return "No record found for Vehicle ID: " + vehicleId;
+                int affectedRow = vehiclerepository.deleteVehicle(vehicleId);
+                if(affectedRow > 0){
+                    return "Vehicle ID: " + vehicleId + " deleted successfully!";
+                }else{
+                    throw new  vehicleNotFoundException("No record found for Vehicle ID: " + vehicleId);
+                }
             }
-        }catch (Exception e){
+        }catch (nullVehicleIdFoundException e){
+            return e.getMessage();
+        }
+        catch (vehicleNotFoundException e){
+            return e.getMessage();
+        }
+        catch (Exception e){
             return "Error in deleting vehicle details. Please contact administrator!";
         }
     }
-
     @Override
     public List<vehicleDataForAssignDTO> assignVehicleData() {
         List<vehicle> vehicles = vehiclerepository.vehicleList();
@@ -152,7 +203,6 @@ public class vehicleServiceIMPL implements vehicleService{
         }
         return vehicleAssignList;
     }
-
     @Transactional
     @Override
     public String assignVehicle(String vehicleId, String bookingId) {
@@ -166,14 +216,11 @@ public class vehicleServiceIMPL implements vehicleService{
             int newNumericId = Integer.parseInt(lastAssignmentId.replace("VASGN", "")) + 1 ;
             newAssignmentId = String.format("VASGN%05d", newNumericId);
         }
-
         try{
             String sessionAdmin = session.getAttribute("admin_id").toString();
             vehicle vehicleObject = vehicleRepository.findById(vehicleId).get();
-
             administrator adminObject = administratorRepo.findById(sessionAdmin).get();
             booking bookingObject = booking.findById(bookingId).get();
-
             VehicleAssignment assignment = new VehicleAssignment(
                     newAssignmentId,
                     LocalDateTime.now(),

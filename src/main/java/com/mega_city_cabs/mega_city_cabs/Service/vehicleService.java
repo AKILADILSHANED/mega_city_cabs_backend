@@ -4,7 +4,6 @@ import com.mega_city_cabs.mega_city_cabs.DTO.registerVehicleDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.vehicleDataForAssignDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.vehicleSearchDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.vehicleUpdateDTO;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 

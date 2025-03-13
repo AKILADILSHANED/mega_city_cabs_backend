@@ -24,12 +24,12 @@ public class receiptPrintDTO {
     private double totalDue;
     private String pickupLocation;
     private String destination;
-    private int returnMessage;
+    private String returnMessage;
 
     public receiptPrintDTO() {
     }
 
-    public receiptPrintDTO(String receiptNumber, LocalDateTime receiptDate, String paymentType, double taxRate, double fare, String customerId, String bookingId, String adminId, double vatAmount, double serviceCharge, double totalDue, String pickupLocation, String destination, int returnMessage) {
+    public receiptPrintDTO(String receiptNumber, LocalDateTime receiptDate, String paymentType, double taxRate, double fare, String customerId, String bookingId, String adminId, double vatAmount, double serviceCharge, double totalDue, String pickupLocation, String destination, String returnMessage) {
         this.receiptNumber = receiptNumber;
         this.receiptDate = receiptDate;
         this.paymentType = paymentType;
@@ -150,11 +150,11 @@ public class receiptPrintDTO {
         this.destination = destination;
     }
 
-    public int getReturnMessage() {
+    public String getReturnMessage() {
         return returnMessage;
     }
 
-    public void setReturnMessage(int returnMessage) {
+    public void setReturnMessage(String returnMessage) {
         this.returnMessage = returnMessage;
     }
 }

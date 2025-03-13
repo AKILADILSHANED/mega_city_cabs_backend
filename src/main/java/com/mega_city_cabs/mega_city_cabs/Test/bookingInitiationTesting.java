@@ -1,0 +1,20 @@
+package com.mega_city_cabs.mega_city_cabs.Test;
+
+import com.mega_city_cabs.mega_city_cabs.DTO.newBookingDTO;
+import com.mega_city_cabs.mega_city_cabs.Service.bookingIMPL;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class bookingInitiationTesting {
+    @Autowired
+    bookingIMPL bookingInitiate;
+    newBookingDTO booking = new newBookingDTO(
+            "Maharagama",
+            "Gampaha",
+            "Mini Cab"
+    );
+    public String bookingInitiateTesting(){
+        return bookingInitiate.newBooking(booking);
+    }
+}

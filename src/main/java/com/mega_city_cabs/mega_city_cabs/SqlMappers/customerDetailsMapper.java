@@ -1,7 +1,6 @@
 package com.mega_city_cabs.mega_city_cabs.SqlMappers;
 
 import com.mega_city_cabs.mega_city_cabs.DTO.customerDTO;
-import com.mega_city_cabs.mega_city_cabs.Entity.customer;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;

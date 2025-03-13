@@ -1,19 +1,15 @@
 package com.mega_city_cabs.mega_city_cabs.Service;
-
 import com.mega_city_cabs.mega_city_cabs.DTO.approveRequestDTO;
 import com.mega_city_cabs.mega_city_cabs.Repository.pendingRequestRepo;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 
 @Service
 public class pendingRequestIMPL implements pendingRequest{
-
     @Autowired
     pendingRequestRepo pendingRequest;
-
     @Transactional
     @Override
     public approveRequestDTO approveRequest(String customerId) {
@@ -23,7 +19,6 @@ public class pendingRequestIMPL implements pendingRequest{
                     LocalDateTime.now(),
                     customerId
             );
-
             if(affectedRows > 0){
                 requestDTO.setCustomerId(customerId);
                 requestDTO.setApproveCode(1);
@@ -35,7 +30,6 @@ public class pendingRequestIMPL implements pendingRequest{
                 requestDTO.setApproveMessage(customerId +  "Unable to approve registration this time. Please contact administrator!");
                 return requestDTO;
             }
-
         }catch (Exception e){
             requestDTO.setCustomerId(customerId);
             requestDTO.setApproveCode(0);
@@ -43,7 +37,6 @@ public class pendingRequestIMPL implements pendingRequest{
             return requestDTO;
         }
     }
-
     @Transactional
     @Override
     public approveRequestDTO rejectRequest(String customerId) {
@@ -53,7 +46,6 @@ public class pendingRequestIMPL implements pendingRequest{
                     LocalDateTime.now(),
                     customerId
             );
-
             if(affectedRows > 0){
                 requestDTO.setCustomerId(customerId);
                 requestDTO.setApproveCode(2);
@@ -65,7 +57,6 @@ public class pendingRequestIMPL implements pendingRequest{
                 requestDTO.setApproveMessage(customerId +  "Unable to reject registration this time. Please contact administrator!");
                 return requestDTO;
             }
-
         }catch (Exception e){
             requestDTO.setCustomerId(customerId);
             requestDTO.setApproveCode(0);

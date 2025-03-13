@@ -1,5 +1,4 @@
 package com.mega_city_cabs.mega_city_cabs.Service;
-
 import com.mega_city_cabs.mega_city_cabs.Repository.adminRepo;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ public class adminServiceIMPL implements adminService {
 
     @Override
     public boolean adminLogin(String userName, String password) {
-
         boolean adminAvailability = login.adminExistance(userName, password);
         if(adminAvailability){
             String adminId = login.getAdminId(userName, password);

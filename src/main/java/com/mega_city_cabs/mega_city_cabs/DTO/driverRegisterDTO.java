@@ -1,9 +1,5 @@
 package com.mega_city_cabs.mega_city_cabs.DTO;
 
-import jakarta.persistence.Column;
-
-import java.time.LocalDateTime;
-
 public class driverRegisterDTO {
 
     private String firstName;

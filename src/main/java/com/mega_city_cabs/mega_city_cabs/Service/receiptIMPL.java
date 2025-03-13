@@ -7,10 +7,7 @@ import com.mega_city_cabs.mega_city_cabs.DTO.receiptPrintDTO;
 import com.mega_city_cabs.mega_city_cabs.Entity.booking;
 import com.mega_city_cabs.mega_city_cabs.Entity.customer;
 import com.mega_city_cabs.mega_city_cabs.Entity.receipt;
-import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.bookingNotFoundException;
-import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.customerNotFoundException;
-import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.receiptDeletedException;
-import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.receiptDetailsNotFoundException;
+import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.*;
 import com.mega_city_cabs.mega_city_cabs.Repository.adminRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.bookingRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.customerRepo;
@@ -51,59 +48,65 @@ public class receiptIMPL implements receiptService{
     @Transactional
     @Override
     public receiptConfirmDTO issueReceipt(receiptDTO receiptDto) {
-
         String newReceiptNumber;
         customer customerObj;
         booking bookingObj;
 
         //Generate Receipt Number.
         try{
-            String lastReceipt = receiptRepo.getLastReceiptNumber();
-            if(lastReceipt == null){
-                newReceiptNumber = "RCPT00001";
+            if(receiptDto.getFare() == null || receiptDto.getTaxRate() == null || receiptDto.getPaymentType() == null){
+                throw new nullReceiptIDFound("Receipt details can not be null. Please provide valid data!");
             }else{
-                int newNumericPart = Integer.parseInt(lastReceipt.replace("RCPT", "")) + 1;
-                newReceiptNumber = String.format("RCPT%05d", newNumericPart);
-            }
-        //Getting Customer Object and Booking Object.
-
-            //Get customer object
-            customerObj = customerObject.getCustomerObject(receiptDto.getCustomerId());
-            if(customerObj == null){
-                throw new customerNotFoundException("Customer not found!");
-            }else{
-                bookingObj = booking_repo.getBookingObject(receiptDto.getBookingId());
-                if(bookingObj == null){
-                    throw new bookingNotFoundException("Booking not found!");
+                String lastReceipt = receiptRepo.getLastReceiptNumber();
+                if(lastReceipt == null){
+                    newReceiptNumber = "RCPT00001";
+                }else{
+                    int newNumericPart = Integer.parseInt(lastReceipt.replace("RCPT", "")) + 1;
+                    newReceiptNumber = String.format("RCPT%05d", newNumericPart);
                 }
+                //Getting Customer Object and Booking Object.
+
+                //Get customer object
+                customerObj = customerObject.getCustomerObject(receiptDto.getCustomerId());
+                if(customerObj == null){
+                    throw new customerNotFoundException("Customer not found!");
+                }else{
+                    bookingObj = booking_repo.getBookingObject(receiptDto.getBookingId());
+                    if(bookingObj == null){
+                        throw new bookingNotFoundException("Booking not found!");
+                    }
+                }
+                receipt receiptObject = new receipt(
+                        newReceiptNumber,
+                        LocalDateTime.now(),
+                        receiptDto.getPaymentType(),
+                        receiptDto.getTaxRate(),
+                        0,
+                        receiptDto.getFare(),
+                        admin.findById(session.getAttribute("admin_id").toString()).get(),
+                        customerObj,
+                        bookingObj
+                );
+                receiptRepo.save(receiptObject);
+                return new receiptConfirmDTO(
+                        newReceiptNumber,
+                        "Receipt Issued Successfully!"
+                );
             }
-            receipt receiptObject = new receipt(
-                    newReceiptNumber,
-                    LocalDateTime.now(),
-                    receiptDto.getPaymentType(),
-                    receiptDto.getTaxRate(),
-                    0,
-                    receiptDto.getFare(),
-                    admin.findById(session.getAttribute("admin_id").toString()).get(),
-                    customerObj,
-                    bookingObj
-            );
-            receiptRepo.save(receiptObject);
+        }catch (nullReceiptIDFound e){
             return new receiptConfirmDTO(
-                    newReceiptNumber,
-                    "0"
+                    null,
+                    e.getMessage()
             );
-
-
         }catch(customerNotFoundException e){
              return new receiptConfirmDTO(
                      null,
-                     "1"
+                     e.getMessage()
              );
         }catch (bookingNotFoundException e){
             return new receiptConfirmDTO(
                     null,
-                    "2"
+                    e.getMessage()
             );
         }
     }
@@ -182,7 +185,7 @@ public class receiptIMPL implements receiptService{
                         0,
                         null,
                         null,
-                        1
+                        e.getMessage()
                 );
         }
 
@@ -191,34 +194,39 @@ public class receiptIMPL implements receiptService{
     @Override
     public receiptPrintDTO receiptReprint(String receiptNumber) {
         try{
-            Integer deleteStatus = receiptRepo.checkReceiptDeletionStatus(receiptNumber);
-            if(deleteStatus == null){
-                throw new receiptDetailsNotFoundException("");
-            }
-            if(deleteStatus == 1){
-                throw new receiptDeletedException("");
-            }
-            else{
-                String Sql = "SELECT rec.receipt_number, rec.receipt_date, rec.payment_type,rec.tax_rate, rec.fare, rec.customer_id, rec.booking_id, rec.admin_id, bk.pickup_location, bk.destination FROM receipt rec LEFT JOIN booking bk ON rec.booking_id = bk.booking_id WHERE rec.receipt_number = ?";
-                List<receiptPrintDTO> receiptDetailsList = template.query(Sql, new receiptDetailsMapper(),new Object[]{receiptNumber});
+            if(receiptNumber == null){
+                throw new nullReceiptIDFound("Receipt number is null. Please provide valid Receipt number!");
+            }else{
+                Integer deleteStatus = receiptRepo.checkReceiptDeletionStatus(receiptNumber);
+                if(deleteStatus == null){
+                    throw new receiptDetailsNotFoundException("");
+                }
+                if(deleteStatus == 1){
+                    throw new receiptDeletedException("");
+                }
+                else{
+                    String Sql = "SELECT rec.receipt_number, rec.receipt_date, rec.payment_type,rec.tax_rate, rec.fare, rec.customer_id, rec.booking_id, rec.admin_id, bk.pickup_location, bk.destination FROM receipt rec LEFT JOIN booking bk ON rec.booking_id = bk.booking_id WHERE rec.receipt_number = ?";
+                    List<receiptPrintDTO> receiptDetailsList = template.query(Sql, new receiptDetailsMapper(),new Object[]{receiptNumber});
 
-                if(!receiptDetailsList.isEmpty()){
-                    receiptPrintDTO receiptDetailObject = receiptDetailsList.get(0);
-                    //Calculate VAT amount.
-                    double VatAmount = Math.round(receiptDetailObject.getFare() * ((double) receiptDetailObject.getTaxRate() /100));
-                    double serviceCharge = Math.round(receiptDetailObject.getFare() * ((double) 10 /100));
-                    double totalDue = Math.round(receiptDetailObject.getFare() + VatAmount + serviceCharge);
+                    if(!receiptDetailsList.isEmpty()){
+                        receiptPrintDTO receiptDetailObject = receiptDetailsList.get(0);
+                        //Calculate VAT amount.
+                        double VatAmount = Math.round(receiptDetailObject.getFare() * ((double) receiptDetailObject.getTaxRate() /100));
+                        double serviceCharge = Math.round(receiptDetailObject.getFare() * ((double) 10 /100));
+                        double totalDue = Math.round(receiptDetailObject.getFare() + VatAmount + serviceCharge);
 
-                    receiptDetailObject.setVatAmount(VatAmount);
-                    receiptDetailObject.setServiceCharge(serviceCharge);
-                    receiptDetailObject.setTotalDue(totalDue);
+                        receiptDetailObject.setVatAmount(VatAmount);
+                        receiptDetailObject.setServiceCharge(serviceCharge);
+                        receiptDetailObject.setTotalDue(totalDue);
 
-                    return receiptDetailObject;
-                }else{
-                    throw new receiptDetailsNotFoundException("No receipt details found!");
+                        return receiptDetailObject;
+                    }else{
+                        throw new receiptDetailsNotFoundException("No receipt details found!");
+                    }
                 }
             }
-        }catch(receiptDetailsNotFoundException e){
+
+        }catch (nullReceiptIDFound e){
             return new receiptPrintDTO(
                     null,
                     null,
@@ -233,7 +241,25 @@ public class receiptIMPL implements receiptService{
                     0,
                     null,
                     null,
-                    2 // No receipt found
+                    e.getMessage()
+            );
+        }
+        catch(receiptDetailsNotFoundException e){
+            return new receiptPrintDTO(
+                    null,
+                    null,
+                    null,
+                    0,
+                    0,
+                    null,
+                    null,
+                    null,
+                    0,
+                    0,
+                    0,
+                    null,
+                    null,
+                    e.getMessage()
             );
         }catch (receiptDeletedException e){
             return new receiptPrintDTO(
@@ -250,7 +276,7 @@ public class receiptIMPL implements receiptService{
                     0,
                     null,
                     null,
-                    1 //Receipt already deleted
+                    e.getMessage()
             );
         }
     }
@@ -259,21 +285,27 @@ public class receiptIMPL implements receiptService{
     @Override
     public String deleteReceipt(String receiptNumber) {
         try{
-            //Check whether the receipt is already deleted or not.
-            Integer deleteStatus = receiptRepo.checkReceiptDeletionStatus(receiptNumber);
-            if(deleteStatus == null){
-                throw new receiptDetailsNotFoundException("");
-            }
-            if(deleteStatus == 0){
-                int affectedRows = receiptRepo.deleteReceipt(receiptNumber);
-                return "Receipt number " + receiptNumber + " deleted successfully!";
+            if(receiptNumber == null){
+                throw new nullReceiptIDFound("Receipt number is null. Please provide valid receipt id!");
             }else{
+                //Check whether the receipt is already deleted or not.
+                Integer deleteStatus = receiptRepo.checkReceiptDeletionStatus(receiptNumber);
+                if(deleteStatus == null){
+                    throw new receiptDetailsNotFoundException("");
+                }
+                if(deleteStatus == 0){
+                    int affectedRows = receiptRepo.deleteReceipt(receiptNumber);
+                    return "Receipt number " + receiptNumber + " deleted successfully!";
+                }else{
                     throw new receiptDeletedException("");
+                }
             }
         }catch (receiptDetailsNotFoundException e){
             return "No receipt details found for provided Receipt NUmber!";
         }catch (receiptDeletedException e){
             return "This receipt number is already deleted!";
+        }catch (nullReceiptIDFound e){
+            return e.getMessage();
         }
     }
 }

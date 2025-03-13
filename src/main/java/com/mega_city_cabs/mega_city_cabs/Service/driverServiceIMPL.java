@@ -1,10 +1,11 @@
 package com.mega_city_cabs.mega_city_cabs.Service;
-
 import com.mega_city_cabs.mega_city_cabs.DTO.*;
 import com.mega_city_cabs.mega_city_cabs.Entity.DriverAssignment;
 import com.mega_city_cabs.mega_city_cabs.Entity.administrator;
 import com.mega_city_cabs.mega_city_cabs.Entity.booking;
 import com.mega_city_cabs.mega_city_cabs.Entity.driver;
+import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.driverNotRegisteredException;
+import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.nullDriverIdFoundException;
 import com.mega_city_cabs.mega_city_cabs.Repository.adminRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.bookingRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.driverAssignmentRepo;
@@ -20,27 +21,20 @@ import java.util.Optional;
 
 @Service
 public class driverServiceIMPL implements driverService{
-
     @Autowired
     driverRepo driverRepository;
-
     @Autowired
     driverAssignmentRepo driverAssignment;
-
     @Autowired
     HttpSession session;
-
     @Autowired
     adminRepo administratorRepo;
-
     @Autowired
     bookingRepo booking;
 
     @Override
     public String registerDriver(driverRegisterDTO driverRegister) {
-
         String newLastDriverId;
-
         //Generate Driver ID.
         try{
             String lastDriverId = driverRepository.getLastDriverId();
@@ -53,48 +47,38 @@ public class driverServiceIMPL implements driverService{
         }catch(Exception e){
                 return e.getMessage();
         }
-
-        //Update data for driver entity to save in driver table
-        driver driverObj = new driver(
-                newLastDriverId,
-                driverRegister.getFirstName(),
-                driverRegister.getLastName(),
-                driverRegister.getContactNumber(),
-                driverRegister.getNic(),
-                LocalDateTime.now(),
-                0,
-                administratorRepo.findById("ADMN001").get()
-        );
-
         //Save driver details to driver table.
-
         try{
-            driverRepository.save(driverObj);
-            return "Driver registered successfully with Driver ID: " + newLastDriverId + "!";
-        }catch (Exception e){
+            if(driverRegister.getFirstName() == null || driverRegister.getLastName()==null||driverRegister.getContactNumber()==null||driverRegister.getNic()==null){
+                    throw new driverNotRegisteredException("Please provide all details of driver. Not accept null values!");
+            }else{
+                //Update data for driver entity to save in driver table
+                driver driverObj = new driver(
+                        newLastDriverId,
+                        driverRegister.getFirstName(),
+                        driverRegister.getLastName(),
+                        driverRegister.getContactNumber(),
+                        driverRegister.getNic(),
+                        LocalDateTime.now(),
+                        0,
+                        administratorRepo.findById("ADMN001").get()
+                );
+                driverRepository.save(driverObj);
+                return "Driver registered successfully with Driver ID: " + newLastDriverId + "!";
+            }
+        }catch (driverNotRegisteredException e){
             return e.getMessage();
         }
     }
-
     @Override
     public driverSearchDTO driverSearch(String driverId) {
-
         try{
-            //Check any record available for provided driver id.
-            Optional<driver> searchedDriver =  driverRepository.findById(driverId);
-            if(searchedDriver.isEmpty()){
-                return new driverSearchDTO(
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        "No driver details found for provided Driver ID!"
-                );
+            if(driverId == null){
+                throw new nullDriverIdFoundException("Driver ID is null. Please provide valid Driver ID!");
             }else{
-
-                if(searchedDriver.get().getIsDeleted() == 1){
+                //Check any record available for provided driver id.
+                Optional<driver> searchedDriver =  driverRepository.findById(driverId);
+                if(searchedDriver.isEmpty()){
                     return new driverSearchDTO(
                             null,
                             null,
@@ -102,20 +86,43 @@ public class driverServiceIMPL implements driverService{
                             null,
                             null,
                             null,
-                            "This driver is already removed!"
+                            "No driver details found for provided Driver ID!"
                     );
                 }else{
-                    return new driverSearchDTO(
-                            searchedDriver.get().getDriverId(),
-                            searchedDriver.get().getFirstName(),
-                            searchedDriver.get().getLastName(),
-                            searchedDriver.get().getContactNumber(),
-                            searchedDriver.get().getNic(),
-                            searchedDriver.get().getRegisteredDate(),
-                            null
-                    );
+                    if(searchedDriver.get().getIsDeleted() == 1){
+                        return new driverSearchDTO(
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "This driver is already removed!"
+                        );
+                    }else{
+                        return new driverSearchDTO(
+                                searchedDriver.get().getDriverId(),
+                                searchedDriver.get().getFirstName(),
+                                searchedDriver.get().getLastName(),
+                                searchedDriver.get().getContactNumber(),
+                                searchedDriver.get().getNic(),
+                                searchedDriver.get().getRegisteredDate(),
+                                null
+                        );
+                    }
                 }
             }
+
+        }catch (nullDriverIdFoundException e){
+            return new driverSearchDTO(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    e.getMessage()
+            );
         }catch (Exception e){
             return new driverSearchDTO(
                     null,
@@ -133,39 +140,44 @@ public class driverServiceIMPL implements driverService{
     @Override
     public String driverUpdate(driverUpdateDTO driverUpdate) {
         try {
-            int affectedRows = driverRepository.driverUpdate(
-                    driverUpdate.getFirstName(),
-                    driverUpdate.getLastName(),
-                    driverUpdate.getContactNumber(),
-                    driverUpdate.getNic(),
-                    driverUpdate.getDriverId()
-            );
-
-            if (affectedRows > 0) {
-                return "Driver details updated successfully!";
-            } else {
-                return "No record found for provided Driver ID!";
+            if(driverUpdate.getDriverId() == null){
+                throw new nullDriverIdFoundException("Driver ID can not be null!");
+            }else{
+                int affectedRows = driverRepository.driverUpdate(
+                        driverUpdate.getFirstName(),
+                        driverUpdate.getLastName(),
+                        driverUpdate.getContactNumber(),
+                        driverUpdate.getNic(),
+                        driverUpdate.getDriverId()
+                );
+                if (affectedRows > 0) {
+                    return "Driver details updated successfully!";
+                } else {
+                    return "No record found for provided Driver ID!";
+                }
             }
-        }catch (Exception e){
+        }catch (nullDriverIdFoundException e){
             return e.getMessage();
         }
     }
-
     @Transactional
     @Override
     public String removeDriver(String driverId) {
         try{
-            int affectedRows = driverRepository.removeDriver(driverId);
-            if(affectedRows > 0){
-                return "Driver removed successfully!";
+            if(driverId == null){
+                throw new nullDriverIdFoundException("Driver ID is null. Please provide valid Driver ID!");
             }else{
-                return "No driver details found for provided Driver ID!";
+                int affectedRows = driverRepository.removeDriver(driverId);
+                if(affectedRows > 0){
+                    return "Driver removed successfully!";
+                }else{
+                    return "No driver details found for provided Driver ID!";
+                }
             }
-        }catch (Exception e){
+        }catch (nullDriverIdFoundException e){
             return e.getMessage();
         }
     }
-
     @Override
     public List<driverDataForAssignDTO> getDriverDataForAssign() {
         List<driver> driverList = driverRepository.getDriverDataForAssign();
@@ -180,13 +192,10 @@ public class driverServiceIMPL implements driverService{
         }
         return driverDataList;
     }
-
     @Transactional
     @Override
     public String assignDriver(String driverId, String bookingId) {
-
         String newAssignmentId = null;
-
         //Get last assignment id form driver assignment table.
         String lastAssignmentId = driverAssignment.getLastDriverAssignmentId();
         if(lastAssignmentId == null){
@@ -195,14 +204,11 @@ public class driverServiceIMPL implements driverService{
             int newNumericId = Integer.parseInt(lastAssignmentId.replace("DASGN", "")) + 1 ;
             newAssignmentId = String.format("DASGN%05d", newNumericId);
         }
-
         try{
-            String sessionAdmin = session.getAttribute("admin_id").toString();
+            String sessionAdmin = /*session.getAttribute("admin_id").toString()*/"ADMN001";
             driver driverObject = driverRepository.findById(driverId).get();
-
             administrator adminObject = administratorRepo.findById(sessionAdmin).get();
             booking bookingObject = booking.findById(bookingId).get();
-
             DriverAssignment assignment = new DriverAssignment(
                     newAssignmentId,
                     LocalDateTime.now(),

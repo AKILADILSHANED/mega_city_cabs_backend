@@ -19,16 +19,19 @@ public class vehicleSearchDTO {
 
     private administrator Admin;
 
+    private String message;
+
     public vehicleSearchDTO() {
     }
 
-    public vehicleSearchDTO(String vehicleId, String vehicleNumber, String vehicleType, String vehicleModel, LocalDateTime registeredDate, administrator admin) {
+    public vehicleSearchDTO(String vehicleId, String vehicleNumber, String vehicleType, String vehicleModel, LocalDateTime registeredDate, administrator admin, String message) {
         this.vehicleId = vehicleId;
         this.vehicleNumber = vehicleNumber;
         this.vehicleType = vehicleType;
         this.vehicleModel = vehicleModel;
         this.registeredDate = registeredDate;
         Admin = admin;
+        this.message = message;
     }
 
     public String getVehicleId() {
@@ -77,5 +80,13 @@ public class vehicleSearchDTO {
 
     public void setAdmin(administrator admin) {
         Admin = admin;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

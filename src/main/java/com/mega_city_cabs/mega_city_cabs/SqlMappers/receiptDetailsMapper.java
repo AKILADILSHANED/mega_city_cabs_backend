@@ -22,7 +22,7 @@ public class receiptDetailsMapper implements RowMapper<receiptPrintDTO> {
         receiptDetails.setAdminId(rs.getString(8));
         receiptDetails.setPickupLocation(rs.getString(9));
         receiptDetails.setDestination(rs.getString(10));
-        receiptDetails.setReturnMessage(0);
+        receiptDetails.setReturnMessage("");
         return receiptDetails;
     }
 }

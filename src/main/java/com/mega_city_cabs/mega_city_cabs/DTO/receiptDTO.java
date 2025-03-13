@@ -8,15 +8,15 @@ import java.time.LocalDateTime;
 public class receiptDTO {
 
     private String paymentType;
-    private double taxRate;
-    private double fare;
+    private Double taxRate;
+    private Double fare;
     private String customerId;
     private String bookingId;
 
     public receiptDTO() {
     }
 
-    public receiptDTO(String paymentType, double taxRate, double fare, String customerId, String bookingId) {
+    public receiptDTO(String paymentType, Double taxRate, Double fare, String customerId, String bookingId) {
         this.paymentType = paymentType;
         this.taxRate = taxRate;
         this.fare = fare;
@@ -32,7 +32,7 @@ public class receiptDTO {
         this.paymentType = paymentType;
     }
 
-    public double getTaxRate() {
+    public Double getTaxRate() {
         return taxRate;
     }
 
@@ -40,7 +40,7 @@ public class receiptDTO {
         this.taxRate = taxRate;
     }
 
-    public double getFare() {
+    public Double getFare() {
         return fare;
     }
 
