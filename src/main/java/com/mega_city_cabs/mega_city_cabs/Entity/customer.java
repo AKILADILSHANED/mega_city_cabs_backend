@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "customer")
 public class customer {
-
     @Id
     @Column(name = "customer_id", length = 7, nullable = false)
     private String customerId;
@@ -25,6 +24,7 @@ public class customer {
 
     public customer() {
     }
+
     public customer(String customerId, String firstName, String lastName, String contact, String email, String nic, String address, String password) {
         this.customerId = customerId;
         this.firstName = firstName;
@@ -35,6 +35,7 @@ public class customer {
         this.address = address;
         this.password = password;
     }
+
     public String getCustomerId() {
         return customerId;
     }

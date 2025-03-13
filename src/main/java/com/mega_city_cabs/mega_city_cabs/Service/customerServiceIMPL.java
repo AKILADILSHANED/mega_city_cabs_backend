@@ -1,15 +1,20 @@
 package com.mega_city_cabs.mega_city_cabs.Service;
+import com.mega_city_cabs.mega_city_cabs.DTO.customerLoginDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.customerRegisterDTO;
 import com.mega_city_cabs.mega_city_cabs.DTO.pendingCustomerRegistrationsDTO;
 import com.mega_city_cabs.mega_city_cabs.Entity.CustomerRegistrationRequest;
 import com.mega_city_cabs.mega_city_cabs.Entity.customer;
 import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.customerNotSavingException;
+import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.userNotFoundException;
+import com.mega_city_cabs.mega_city_cabs.ExceptionsHandling.userRegistrationPendingException;
 import com.mega_city_cabs.mega_city_cabs.Repository.customerRepo;
 import com.mega_city_cabs.mega_city_cabs.Repository.pendingRegistration;
 import com.mega_city_cabs.mega_city_cabs.Repository.registrationRequestRepo;
+import com.mega_city_cabs.mega_city_cabs.SqlMappers.customerLoginMapper;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,17 +29,26 @@ public class customerServiceIMPL implements customerService{
     pendingRegistration registration;
     @Autowired
     HttpSession session;
+    @Autowired
+    JdbcTemplate template;
 
     @Override
     public String customerLogin(String email, String password) {
         try{
-            String customerAvailability = customerRepository.searchLoginCustomer(email, password);
-            if(customerAvailability == null){
-                return "0";
-            }else {
-                //session.setAttribute("customer_id", customerAvailability);
-                return "1" ;
+            String Sql = "SELECT CUS.customer_id, REQ.is_confirmed FROM customer CUS LEFT JOIN registration_requests REQ ON CUS.customer_id = REQ.customer_id WHERE CUS.email = ? AND CUS.password = ?";
+            List<customerLoginDTO> customerAvailability = template.query(Sql, new customerLoginMapper(),new Object[]{email, password});
+            if(customerAvailability.isEmpty()){
+                throw new userNotFoundException("Invalid User Name or Password!");
+            }else{
+                if(customerAvailability.get(0).getIsConfirmed() == 0){
+                    throw new userRegistrationPendingException("Your sign up request still not confirmed. Please wait until it confirmed by admin!");
+                }else{
+                    session.setAttribute("customer_id", customerAvailability.get(0).getCustomerId());
+                    return "1";
+                }
             }
+        }catch (userNotFoundException | userRegistrationPendingException e){
+            return e.getMessage();
         }catch (Exception e){
             return e.getMessage();
         }

@@ -90,7 +90,7 @@ public class receiptIMPL implements receiptService{
                 receiptRepo.save(receiptObject);
                 return new receiptConfirmDTO(
                         newReceiptNumber,
-                        "Receipt Issued Successfully!"
+                        "Receipt Issued Successfully with Receipt Number: " + newReceiptNumber
                 );
             }
         }catch (nullReceiptIDFound e){
@@ -193,6 +193,7 @@ public class receiptIMPL implements receiptService{
 
     @Override
     public receiptPrintDTO receiptReprint(String receiptNumber) {
+        System.out.println(receiptNumber);
         try{
             if(receiptNumber == null){
                 throw new nullReceiptIDFound("Receipt number is null. Please provide valid Receipt number!");
